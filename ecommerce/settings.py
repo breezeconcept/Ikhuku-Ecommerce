@@ -50,12 +50,20 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'drf_yasg',
+    'django_filters',
+    'corsheaders',
 
     'Accounts',
+    'Products',
+    'Carts',
+    'History',
+    'Whishlist',
+    'Payment',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -91,6 +99,8 @@ REST_FRAMEWORK = {
         # 'rest_framework_simplejwt.authentication.JWTAuthentication',
         # Other authentication classes can be added here if needed
     ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10  # Set the number of items per page here
     # Other DRF settings
     # ...
 }
@@ -187,3 +197,19 @@ STORAGES = {
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # Replace with your frontend URL
+    "https://ikhuku.vercel.app",  # Add additional allowed origins if needed
+]
+
+
+# Optional: Additional CORS settings
+# CORS_ALLOW_HEADERS
+# CORS_ALLOW_METHODS
+# CORS_ALLOW_CREDENTIALS
+# CORS_EXPOSE_HEADERS
+# CORS_PREFLIGHT_MAX_AGE
+# CORS_ALLOW_ALL_ORIGINS
+# CORS_ALLOW_ALL_HEADERS
+# CORS_ALLOW_ALL_METHODS

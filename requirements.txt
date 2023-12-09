@@ -1,6 +1,8 @@
 asgiref
 dj-database-url
 Django
+django-cors-headers
+django-filter
 djangorestframework
 djangorestframework-simplejwt
 drf-yasg
