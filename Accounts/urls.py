@@ -3,7 +3,7 @@ from .views import (
     CreateUserView, 
     UpdateUserView, 
     UserLoginView, 
-    UserLogoutView, 
+    # UserLogoutView, 
     EmailVerificationView, 
     PasswordResetRequestView, 
     PasswordResetConfirmView,

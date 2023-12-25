@@ -8,7 +8,8 @@ from .models import CustomUser
 @receiver(post_save, sender=CustomUser)
 def send_verification_email(sender, instance, created, **kwargs):
     if created:  # Only send email on user creation
-        verification_link = reverse('confirm-email', kwargs={'token': instance.id})
+        # verification_link = reverse('confirm-email', kwargs={'token': instance.id})
+        verification_link = reverse('confirm-email', kwargs={'id': str(instance.id)})
         verification_url = settings.BASE_URL + verification_link  # Replace BASE_URL with your URL
 
         send_mail(

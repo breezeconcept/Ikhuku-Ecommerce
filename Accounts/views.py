@@ -56,7 +56,7 @@ class EmailVerificationView(generics.UpdateAPIView):
     serializer_class = EmailVerificationSerializer  # Create serializer for verification
     lookup_field = 'id'
 
-    def put(self, request, *args, **kwargs):
+    def put(self, request, id):
         user = self.get_object()
         user.is_verified = True
         user.is_active = True
@@ -131,12 +131,11 @@ class TokenVerifyView(APIView):
             return Response({'error': 'Token not provided'}, status=status.HTTP_400_BAD_REQUEST)
         
         try:
-            refresh = RefreshToken(token)
+            refresh = RefreshToken(str(token))  # Ensure the token is converted to a string
             refresh.check_blacklist()
             return Response({'message': 'Token is valid'}, status=status.HTTP_200_OK)
         except Exception as e:
             return Response({'error': 'Invalid token'}, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 
