@@ -26,7 +26,7 @@ from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.urls import reverse
 from django.contrib.auth import get_user_model
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 
 
 
@@ -107,35 +107,37 @@ class UserLoginView(APIView):
 
 
 
-class TokenRefreshView(APIView):
-    def post(self, request):
-        refresh_token = request.data.get('refresh')
+# class TokenRefreshView(APIView):
+#     def post(self, request):
+#         refresh_token = request.data.get('refresh')
         
-        if not refresh_token:
-            return Response({'error': 'Refresh token not provided'}, status=status.HTTP_400_BAD_REQUEST)
+#         if not refresh_token:
+#             return Response({'error': 'Refresh token not provided'}, status=status.HTTP_400_BAD_REQUEST)
         
-        try:
-            refresh = RefreshToken(refresh_token)
-            access_token = str(refresh.access_token)
-            return Response({'access_token': access_token}, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({'error': 'Invalid refresh token'}, status=status.HTTP_400_BAD_REQUEST)
+#         try:
+#             refresh = RefreshToken(refresh_token)
+#             access_token = str(refresh.access_token)
+#             return Response({'access_token': access_token}, status=status.HTTP_200_OK)
+#         except Exception as e:
+#             return Response({'error': 'Invalid refresh token'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 
-class TokenVerifyView(APIView):
-    def post(self, request):
-        token = request.data.get('token')
+# class TokenVerifyView(APIView):
+#     def post(self, request):
+#         token = request.data.get('token')
         
-        if not token:
-            return Response({'error': 'Token not provided'}, status=status.HTTP_400_BAD_REQUEST)
+#         if not token:
+#             return Response({'error': 'Token not provided'}, status=status.HTTP_400_BAD_REQUEST)
         
-        try:
-            refresh = RefreshToken(str(token))  # Ensure the token is converted to a string
-            refresh.check_blacklist()
-            return Response({'message': 'Token is valid'}, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({'error': 'Invalid token'}, status=status.HTTP_400_BAD_REQUEST)
+#         try:
+#             access_token = AccessToken(token)
+#             if access_token.is_valid():
+#                 return Response({'message': 'Token is valid'}, status=status.HTTP_200_OK)
+#             else:
+#                 return Response({'error': 'Invalid token'}, status=status.HTTP_400_BAD_REQUEST)
+#         except Exception as e:
+#             return Response({'error': 'Invalid token'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 
@@ -338,13 +340,16 @@ class GrantAdminRightsView(generics.UpdateAPIView):
         user.save()
         return Response({'message': 'Admin rights granted successfully'}, status=status.HTTP_200_OK)
 
-
+from drf_yasg.utils import swagger_auto_schema
 # Endpoint to revoke admin rights from an account
+
 class RevokeAdminRightsView(generics.UpdateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = CreateUserSerializer
     permission_classes = [IsAdminUser]
 
+    # @swagger_auto_schema(tags=['revoke-admin-rights'], operation_summary="Your one-line description here")
+    @swagger_auto_schema(operation_summary="Your one-line description here")
     def put(self, request, *args, **kwargs):
         user = self.get_object()
         user.is_admin = False

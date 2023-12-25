@@ -14,14 +14,14 @@ from .views import (
     RevokeAdminRightsView,
     GrantStaffRightsView,
     RevokeStaffRightsView,
+    # TokenRefreshView,
+    # TokenVerifyView,
+    )
+from rest_framework_simplejwt.views import (
+    # TokenObtainPairView,
     TokenRefreshView,
     TokenVerifyView,
-    )
-# from rest_framework_simplejwt.views import (
-#     TokenObtainPairView,
-#     TokenRefreshView,
-#     TokenVerifyView,
-# )
+)
 
 urlpatterns = [
     path('register/', CreateUserView.as_view(), name='user-create'),
@@ -30,6 +30,7 @@ urlpatterns = [
     path('update-account/<uuid:pk>/', UpdateUserView.as_view(), name='user-detail'),
 
     path('login/', UserLoginView.as_view(), name='user-login'),
+    # path('token/create/', TokenObtainPairView.as_view(), name='token_create'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),
 
