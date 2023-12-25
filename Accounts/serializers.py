@@ -1,8 +1,7 @@
 from rest_framework import serializers
-from .models import CustomUser
+from .models import CustomUser, SellerProfile
 
-from rest_framework import serializers
-from .models import CustomUser
+
 
 
 
@@ -13,7 +12,7 @@ class CreateUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ['id', 'email', 'first_name', 'last_name', 'phone_number', 'profile_picture', 'address', 'password']
+        fields = ['id', 'email', 'first_name', 'last_name', 'phone_number', 'profile_picture', 'address', 'password',  'is_merchant', 'is_verified']
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
@@ -30,6 +29,14 @@ class CreateUserSerializer(serializers.ModelSerializer):
 
 
 
+
+class EmailVerificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = []  # Empty fields as it's only for verification
+
+
+
 class UpdateUserSerializer(serializers.ModelSerializer):
     profile_picture = serializers.ImageField(allow_null=True, required=False)
     address = serializers.CharField(allow_blank=True, required=False)
@@ -38,4 +45,27 @@ class UpdateUserSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ['email', 'first_name', 'last_name', 'phone_number', 'profile_picture', 'address']
 
+
+
+class SellerProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SellerProfile
+        fields = '__all__'  # Include all fields in the serializer
+
+
+
+class SellerVerificationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SellerProfile
+        fields = ['is_verified']  # Fields that can be updated by admin for seller verification
+
+
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    class Meta:
+        model = CustomUser
+        fields = ['email']
 

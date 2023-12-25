@@ -11,7 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
-# from datetime import timedelta
+from datetime import timedelta
 
 import os
 from dotenv import load_dotenv
@@ -48,10 +48,13 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'rest_framework',
-    'rest_framework.authtoken',
+    # 'rest_framework.authtoken',
     'drf_yasg',
     'django_filters',
     'corsheaders',
+    # 'axes',
+    # 'csp',
+
 
     'Accounts',
     'Products',
@@ -60,17 +63,20 @@ INSTALLED_APPS = [
     'Whishlist',
     'Payment',
 ]
-
+    # 'django.middleware.security.SecurityMiddleware',
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    # 'djangosecure.middleware.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    # 'csp.middleware.CSPMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # 'axes.middleware.AxesMiddleware',
 ]
 
 ROOT_URLCONF = 'ecommerce.urls'
@@ -95,8 +101,8 @@ WSGI_APPLICATION = 'ecommerce.wsgi.application'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
-        # 'rest_framework_simplejwt.authentication.JWTAuthentication',
+        # 'rest_framework.authentication.TokenAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
         # Other authentication classes can be added here if needed
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
@@ -104,6 +110,22 @@ REST_FRAMEWORK = {
     # Other DRF settings
     # ...
 }
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # Customize token expiration
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'VERIFYING_KEY': None,
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'TOKEN_TYPE_CLAIM': 'token_type',
+}
+
 
 # SIMPLE_JWT = {
 #     'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),  # Set the token expiration time
@@ -115,6 +137,23 @@ REST_FRAMEWORK = {
 #     'REFRESH_TOKEN_LIFETIME': timedelta(days=15),
 # }
 
+
+# AXES_ENABLED = False
+
+# AUTHENTICATION_BACKENDS = [
+#     'axes.backends.AxesStandaloneBackend',
+#     # Other authentication backends
+# ]
+
+# if os.environ.get('DJANGO_ENV') is not None:
+#     SECURE_SSL_REDIRECT = False
+#     SESSION_COOKIE_SECURE = False
+#     CSRF_COOKIE_SECURE = False
+# else:
+#     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+#     SECURE_SSL_REDIRECT = True
+#     SESSION_COOKIE_SECURE = True
+#     CSRF_COOKIE_SECURE = True
 
 AUTH_USER_MODEL = 'Accounts.CustomUser'
 
@@ -135,6 +174,55 @@ AUTH_USER_MODEL = 'Accounts.CustomUser'
 # EMAIL_FIELD = 'email'
 # USERNAME_FIELD = 'email'
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'mssql',
+#         'NAME': 'mydb',
+#         'USER': 'user@myserver',
+#         'PASSWORD': 'password',
+#         'HOST': 'myserver.database.windows.net',
+#         'PORT': '',
+
+#         'OPTIONS': {
+#             'driver': 'ODBC Driver 17 for SQL Server',
+#         },
+#     },
+# }
+
+# DATABASES = {
+#     'default': {
+#         # String. It must be "mssql".
+#         'ENGINE': 'mssql',
+
+#         # String. Database name. Required.
+#         'NAME': 'mydb',
+
+#         # String. Database user name in "user" format. If not given then MS Integrated Security will be used.
+#         'USER': 'user@myserver',
+
+#         # String. Database user password.
+#         'PASSWORD': 'password',
+
+#          # String. SQL Server instance in "server\instance" format.
+#         'HOST': 'myserver.database.windows.net',
+
+#         # String. Server instance port. An empty string means the default port.
+#         'PORT': '',
+
+#         # Dictionary. Additional database settings.
+#         'OPTIONS': {
+#             # String. ODBC Driver to use ("ODBC Driver 17 for SQL Server", 
+#             # "SQL Server Native Client 11.0", "FreeTDS" etc). 
+#             # Default is "ODBC Driver 17 for SQL Server".
+#             'driver': 'ODBC Driver 17 for SQL Server',
+#         },
+#     },
+# }
+
+
+# # set this to False if you want to turn off pyodbc's connection pooling
+# DATABASE_CONNECTION_POOLING = False
+
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
@@ -154,18 +242,39 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
-    {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
     },
     {
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        'OPTIONS': {
+            'user_attributes': ['username', 'email'],
+        },
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {
+            'min_length': 8,
+        }
+    },
 ]
+
+# AUTH_PASSWORD_VALIDATORS = [
+#     {
+#         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+#     },
+#     {
+#         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+#     },
+#     {
+#         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+#     },
+#     {
+#         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+#     },
+# ]
 
 
 # Internationalization
@@ -186,6 +295,9 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Define the directory to store uploaded media files
+MEDIA_URL = '/media/'  # Define the URL prefix for media files
+
 STORAGES = {
     # ...
     "staticfiles": {
@@ -203,6 +315,8 @@ CORS_ALLOWED_ORIGINS = [
     "https://ikhuku.vercel.app",  # Add additional allowed origins if needed
 ]
 
+BASE_URL = os.environ.get('BASE_URL')
+
 
 # Optional: Additional CORS settings
 # CORS_ALLOW_HEADERS
@@ -213,3 +327,68 @@ CORS_ALLOWED_ORIGINS = [
 # CORS_ALLOW_ALL_ORIGINS
 # CORS_ALLOW_ALL_HEADERS
 # CORS_ALLOW_ALL_METHODS
+
+
+
+
+# Email configuration for sending verification emails
+EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND')
+EMAIL_HOST = os.environ.get('EMAIL_HOST')  
+EMAIL_PORT = os.environ.get('EMAIL_PORT')   
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+EMAIL_USE_SSL = os.environ.get('EMAIL_USE_SSL')
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS')
+
+# Additional email settings if required
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')  # Replace with your default sender email
+
+
+FLW_SEC_KEY = os.environ.get('FLW_SEC_KEY')
+
+
+# Use secure session cookies (HTTPS-only)
+# SESSION_COOKIE_SECURE = False
+# CSRF_COOKIE_SECURE = False
+# Set session expiry time
+# SESSION_COOKIE_AGE = 3600  # Set the session timeout in seconds
+
+
+# Set login failure limits and lockout duration
+# AXES_FAILURE_LIMIT = 3
+# AXES_LOCK_OUT_AT_FAILURE = True
+# AXES_COOLOFF_TIME = 60  # Lockout duration in seconds
+
+
+PASSWORD_MIN_LENGTH = 8  # Minimum password length
+PASSWORD_MAX_LENGTH = 50 #(Maximum 50 characters)
+PASSWORD_MIN_CLASSES = 4 #(Requires passwords to contain characters from at least 3 different classes) Character classes often include lowercase letters, uppercase letters, digits, and special characters.
+PASSWORD_COMMON_SEQUENCES = ['123', 'password', 'qwerty'] #(Avoids passwords containing these common sequences)
+PASSWORD_RESET_TIMEOUT_DAYS = 1 #(Password reset links expire after 1 day)
+# PASSWORD_CHANGE_REQUIRED_AFTER_LOGIN = 3 #(Requires password change after 3 logins)
+# PASSWORD_EXPIRY = 90 #(Passwords expire every 90 days)
+# PASSWORD_HISTORY = 5 #(Remembers the last 5 passwords to prevent reuse)
+
+# Configure other password policy settings as needed
+
+
+
+
+
+
+# CSP_DEFAULT_SRC = ("'self'",)
+# CSP_STYLE_SRC = ("'self'", "'unsafe-inline'")
+# CSP_SCRIPT_SRC = ("'self'", "'unsafe-inline'", "'unsafe-eval'")
+# Configure other directives as needed based on your application requirements.
+
+
+
+# Force HTTPS on all connections
+# SECURE_SSL_REDIRECT = True
+# Enable HSTS (HTTP Strict Transport Security)
+# SECURE_HSTS_SECONDS = 31536000  # 1 year
+# Enable browser XSS filtering
+# SECURE_BROWSER_XSS_FILTER = True
+# Prevent content type sniffing
+# SECURE_CONTENT_TYPE_NOSNIFF = True
+# Configure other security-related settings as required

@@ -24,7 +24,12 @@ urlpatterns = [
     path('api/user/', include("Accounts.urls")),
     path('api/user/', include("Products.urls")),
     path('api/user/', include("Carts.urls")),
+    path('api/user/', include("Payment.urls")),
+    path('api/user/', include("History.urls")),
     path('api/user/', include("Whishlist.urls")),
     path('api/', include('ecommerce.swagger')),
 ]
-urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+# Add the following line at the end to serve media files during development
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

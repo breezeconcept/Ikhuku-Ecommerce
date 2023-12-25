@@ -1,8 +1,10 @@
 from django.db import models
 from django.conf import settings
 from Products.models import Product  # Replace 'Products' with your app name
+import uuid
 
 class Favorite(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
 
