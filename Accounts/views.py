@@ -27,7 +27,7 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
-
+from .utils import get_user_id_from_jwt
 
 
 
@@ -71,7 +71,16 @@ class UpdateUserView(generics.RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
-        return self.request.user  
+        user_id = get_user_id_from_jwt(self.request)
+        if user_id:
+            # Fetch the user object using the user_id obtained from the token
+            try:
+                user = CustomUser.objects.get(id=user_id)
+                return user
+            except CustomUser.DoesNotExist:
+                return None
+        else:
+            return None
 
 
 

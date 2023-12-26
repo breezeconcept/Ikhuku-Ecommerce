@@ -27,7 +27,7 @@ urlpatterns = [
     path('register/', CreateUserView.as_view(), name='user-create'),
     path('confirm-email/<uuid:id>/', EmailVerificationView.as_view(), name='confirm-email'),
 
-    path('update-account/<uuid:pk>/', UpdateUserView.as_view(), name='user-detail'),
+    path('update-account/', UpdateUserView.as_view(), name='user-detail'),
 
     path('login/', UserLoginView.as_view(), name='user-login'),
     # path('token/create/', TokenObtainPairView.as_view(), name='token_create'),
