@@ -310,10 +310,12 @@ STORAGES = {
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # Replace with your frontend URL
-    "https://ikhuku.vercel.app",  # Add additional allowed origins if needed
-]
+CORS_ALLOW_ALL_ORIGINS = True  # Allow all origins for testing, but restrict this in production
+
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:3000",  # Replace with your frontend URL
+#     "https://ikhuku.vercel.app",  # Add additional allowed origins if needed
+# ]
 
 BASE_URL = os.environ.get('BASE_URL')
 
@@ -325,8 +327,8 @@ BASE_URL = os.environ.get('BASE_URL')
 # CORS_EXPOSE_HEADERS
 # CORS_PREFLIGHT_MAX_AGE
 # CORS_ALLOW_ALL_ORIGINS
-# CORS_ALLOW_ALL_HEADERS
-# CORS_ALLOW_ALL_METHODS
+# CORS_ALLOW_ALL_HEADERS = True
+# CORS_ALLOW_ALL_METHODS = True
 
 
 
