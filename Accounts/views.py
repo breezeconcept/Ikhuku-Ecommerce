@@ -245,33 +245,41 @@ class ChangePasswordView(APIView):
 
 
 
-# Endpoint to create a seller profile 
+# Endpoint to create a seller profile
 class SellerProfileCreateView(generics.CreateAPIView):
     serializer_class = SellerProfileSerializer
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        user = self.request.user
-        serializer.save(user=user)
-        user.is_merchant = True
-        user.save()
+        user_id = get_user_id_from_jwt(self.request)
+        if user_id:
+            user = self.request.user  # Access the authenticated user
 
-        # Retrieve the created seller profile instance
-        seller_profile_instance = serializer.instance
+            serializer.save(user=user)  # Save the serializer passing the user instance
 
-        # Send email with seller profile data to the company
-        email_subject = 'New Seller Profile Submission'
-        email_body = f"A new seller profile has been submitted by {user.email}.\n\nSeller Profile Data:\n{seller_profile_instance}\n\nPlease review and verify the seller."
-        sender_email = f'{user.email}'  # Replace with your sender email
-        receiver_email = f'{settings.DEFAULT_FROM_EMAIL}'   # Replace with company email
+            user.is_merchant = True
+            user.save()
 
-        try:
-            send_mail(email_subject, email_body, sender_email, [receiver_email], fail_silently=False)
-        except Exception as e:
-            # Handle email sending error
-            return Response({'error': 'Failed to send email'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            # Retrieve the created seller profile instance
+            seller_profile_instance = serializer.instance
 
-        return Response({'message': 'Seller profile created successfully'}, status=status.HTTP_201_CREATED)
+            # Send email with seller profile data to the company
+            email_subject = 'New Seller Profile Submission'
+            email_body = f"A new seller profile has been submitted by {user.email}.\n\nSeller Profile Data:\n{seller_profile_instance}\n\nPlease review and verify the seller."
+            sender_email = user.email  # Use the user's email
+            receiver_email = settings.DEFAULT_FROM_EMAIL
+
+            try:
+                send_mail(email_subject, email_body, sender_email, [receiver_email], fail_silently=False)
+                return Response({'message': 'Seller profile created successfully'}, status=status.HTTP_201_CREATED)
+            except Exception as e:
+                # Handle email sending error
+                return Response({'error': 'Failed to send email'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        else:
+            return Response({'error': 'User ID not found'}, status=status.HTTP_401_UNAUTHORIZED)
+ 
+
+
 
 
 # Endpoint to verify a seller profile
@@ -280,33 +288,37 @@ class SellerVerificationView(generics.UpdateAPIView):
     permission_classes = [IsAdmin]
     queryset = CustomUser.objects.all()  # Define the queryset
 
-    def update(self, request, *args, **kwargs):
-        instance = self.get_object()  # Retrieve the instance to be updated
-        serializer = self.get_serializer(instance, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
 
-        # Custom logic after updating the instance
-        user = get_object_or_404(CustomUser, pk=kwargs['seller_id'])
-        user.is_verified = True
-        user.save()
+    def perform_create(self, serializer):
+        user_id = get_user_id_from_jwt(self.request)
+        if user_id:
+            user = self.request.user  # Access the authenticated user
 
-        # Retrieve the updated seller profile instance
-        seller_profile_instance = serializer.instance
+            serializer.save(user=user)  # Save the serializer passing the user instance
 
-        # Send email with seller profile data to the company
-        email_subject = 'Seller Profile Approval'
-        email_body = f"Hello {user.email}, \nYour seller profile has been screened and approved, Happy sales!!!.\n\nSeller Profile Data:\n{seller_profile_instance}."
-        sender_email = settings.DEFAULT_FROM_EMAIL  # Use settings directly
-        receiver_email = user.email  # Use user's email for receiver
+            user.is_merchant = True
+            user.save()
 
-        try:
-            send_mail(email_subject, email_body, sender_email, [receiver_email], fail_silently=False)
-        except Exception as e:
-            # Handle email sending error
-            return Response({'error': 'Failed to send email'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            # Retrieve the created seller profile instance
+            seller_profile_instance = serializer.instance
 
-        return Response({'message': 'Seller has been verified'}, status=status.HTTP_200_OK)
+            # Send email with seller profile data to the company
+            email_subject = 'New Seller Profile Submission'
+            email_body = f"A new seller profile has been submitted by {user.email}.\n\nSeller Profile Data:\n{seller_profile_instance}\n\nPlease review and verify the seller."
+            sender_email = user.email  # Use the user's email
+            receiver_email = settings.DEFAULT_FROM_EMAIL
+
+            try:
+                send_mail(email_subject, email_body, sender_email, [receiver_email], fail_silently=False)
+                return Response({'message': 'Seller profile created successfully'}, status=status.HTTP_201_CREATED)
+            except Exception as e:
+                # Handle email sending error
+                return Response({'error': 'Failed to send email'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        else:
+            return Response({'error': 'User ID not found'}, status=status.HTTP_401_UNAUTHORIZED)
+
+    
+
 
 
 # Endpoint to give an account staff rights

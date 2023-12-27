@@ -83,7 +83,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 class SellerProfile(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='seller_profile')
+    # user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='seller_profile')
     company_name = models.CharField(max_length=100)
     business_license = models.FileField(upload_to='business_licenses/')
     is_verified = models.BooleanField(default=False)
@@ -92,3 +92,5 @@ class SellerProfile(models.Model):
 
     def __str__(self):
         return f"Seller Profile for {self.user.email}"
+
+

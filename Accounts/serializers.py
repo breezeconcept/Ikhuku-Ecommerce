@@ -43,15 +43,14 @@ class UpdateUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ['email', 'first_name', 'last_name', 'phone_number', 'profile_picture', 'address']
+        fields = ['email', 'first_name', 'last_name', 'phone_number', 'profile_picture', 'address', 'is_merchant']
 
 
 
 class SellerProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = SellerProfile
-        fields = '__all__'  # Include all fields in the serializer
-
+        fields = '__all__'
 
 
 class SellerVerificationSerializer(serializers.ModelSerializer):

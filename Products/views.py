@@ -184,7 +184,7 @@ class MerchantProductCreateView(generics.CreateAPIView):
     permission_classes = [IsAuthenticated]  # Only authenticated merchants can create products
 
     def perform_create(self, serializer):
-        serializer.save(merchant=self.request.user)  # Assign the logged-in user as the merchant
+        serializer.save(user=self.request.user)  # Assign the logged-in user as the merchant
 
 
 

@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserChangeForm, UserCreationForm
-from .models import CustomUser
+from .models import CustomUser, SellerProfile
 
 class CustomUserCreationForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
@@ -37,4 +37,5 @@ class CustomUserAdmin(UserAdmin):
     readonly_fields = ('id',)
 
 admin.site.register(CustomUser, CustomUserAdmin)
+admin.site.register(SellerProfile)
 # admin.site.register(CustomUser)
