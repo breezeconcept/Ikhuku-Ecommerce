@@ -32,7 +32,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = bool(int(os.environ.get('DEBUG', default=0)))
+# DEBUG = bool(int(os.environ.get('DEBUG', default=0)))
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
@@ -112,8 +113,8 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=20160),  # Customize token expiration
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=int(os.environ.get('ACCESS_TOKEN_LIFETIME'))),  # Customize token expiration
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=int(os.environ.get('REFRESH_TOKEN_LIFETIME'))),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
     'ALGORITHM': 'HS256',
@@ -125,6 +126,26 @@ SIMPLE_JWT = {
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
     'TOKEN_TYPE_CLAIM': 'token_type',
 }
+
+
+# Example logging configuration
+# LOGGING = {
+#     'version': 1,
+#     'handlers': {
+#         'console': {
+#             'level': 'DEBUG',
+#             'class': 'logging.StreamHandler',
+#         },
+#     },
+#     'loggers': {
+#         'django': {
+#             'handlers': ['console'],
+#             'level': 'DEBUG',
+#             'propagate': True,
+#         },
+#     },
+# }
+
 
 
 # SIMPLE_JWT = {
@@ -174,50 +195,7 @@ AUTH_USER_MODEL = 'Accounts.CustomUser'
 # EMAIL_FIELD = 'email'
 # USERNAME_FIELD = 'email'
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'mssql',
-#         'NAME': 'mydb',
-#         'USER': 'user@myserver',
-#         'PASSWORD': 'password',
-#         'HOST': 'myserver.database.windows.net',
-#         'PORT': '',
 
-#         'OPTIONS': {
-#             'driver': 'ODBC Driver 17 for SQL Server',
-#         },
-#     },
-# }
-
-# DATABASES = {
-#     'default': {
-#         # String. It must be "mssql".
-#         'ENGINE': 'mssql',
-
-#         # String. Database name. Required.
-#         'NAME': 'mydb',
-
-#         # String. Database user name in "user" format. If not given then MS Integrated Security will be used.
-#         'USER': 'user@myserver',
-
-#         # String. Database user password.
-#         'PASSWORD': 'password',
-
-#          # String. SQL Server instance in "server\instance" format.
-#         'HOST': 'myserver.database.windows.net',
-
-#         # String. Server instance port. An empty string means the default port.
-#         'PORT': '',
-
-#         # Dictionary. Additional database settings.
-#         'OPTIONS': {
-#             # String. ODBC Driver to use ("ODBC Driver 17 for SQL Server", 
-#             # "SQL Server Native Client 11.0", "FreeTDS" etc). 
-#             # Default is "ODBC Driver 17 for SQL Server".
-#             'driver': 'ODBC Driver 17 for SQL Server',
-#         },
-#     },
-# }
 
 
 # # set this to False if you want to turn off pyodbc's connection pooling
@@ -292,18 +270,63 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
+# STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+# AWS_LOCATION = 'static'
+# After that, open up your Command Line Interface (CLI) and run this command:
+# python manage.py collectstatic --noinput
+
+
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Define the directory to store uploaded media files
-MEDIA_URL = '/media/'  # Define the URL prefix for media files
+# MEDIA_URL = '/media/'  # Define the URL prefix for media files
+# MEDIA_URL = 'https://breezeconceptbucket.s3.amazonaws.com/'
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
+MEDIA_URL = 'https://%s.s3.amazonaws.com/' % AWS_STORAGE_BUCKET_NAME
+ 
+# DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'  # Example for Amazon S3 storage
 
-STORAGES = {
-    # ...
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-    },
-}
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
+AWS_S3_SIGNATURE_NAME = os.environ.get('AWS_S3_SIGNATURE_NAME')
+AWS_S3_REGION_NAME = os.environ.get('AWS_S3_REGION_NAME')
+AWS_S3_FILE_OVERWRITE = False
+AWS_DEFAULT_ACL = None
+AWS_S3_VERITY = True
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+
+
+# STORAGES = {
+#     "default": {
+#         "BACKEND": "django.core.files.storage.FileSystemStorage",
+#     },
+#     "staticfiles": {
+#         "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+#     },
+# }
+
+# STORAGES = {
+#     # "default": {
+#     #     "BACKEND": "django.core.files.storage.FileSystemStorage",
+#     # },
+#     # ...
+#     "staticfiles": {
+#         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+#     },
+# }
+
+
+# Example configuration for using Amazon S3
+# DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+# AWS_ACCESS_KEY_ID = 'your_access_key_id'
+# AWS_SECRET_ACCESS_KEY = 'your_secret_access_key'
+# AWS_STORAGE_BUCKET_NAME = 'your_bucket_name'
+# AWS_S3_REGION_NAME = 'your_region_name'
+# AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
