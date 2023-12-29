@@ -27,7 +27,8 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
-from .utils import get_user_id_from_jwt
+from .utils import get_user_id_from_jwt, CustomRenderer
+
 
 
 
@@ -69,6 +70,7 @@ class UpdateUserView(generics.RetrieveUpdateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = UpdateUserSerializer
     permission_classes = [IsAuthenticated]
+    renderer_classes = [CustomRenderer]
 
     def get_object(self):
         user_id = get_user_id_from_jwt(self.request)
@@ -249,75 +251,134 @@ class ChangePasswordView(APIView):
 class SellerProfileCreateView(generics.CreateAPIView):
     serializer_class = SellerProfileSerializer
     permission_classes = [IsAuthenticated]
+    # renderer_classes = [CustomRenderer]
 
-    def perform_create(self, serializer):
-        user_id = get_user_id_from_jwt(self.request)
-        if user_id:
-            user = self.request.user  # Access the authenticated user
 
-            serializer.save(user=user)  # Save the serializer passing the user instance
+    def post(self, request, *args, **kwargs):
+        user = self.request.user
 
-            user.is_merchant = True
-            user.save()
+        # Check if a seller profile already exists for the user
+        if SellerProfile.objects.filter(user=user).exists():
+            message = 'Seller profile already exists for this user'
+            response_data = {
+                "message": message,
+                "status": status.HTTP_400_BAD_REQUEST,
+                "data": {
+                    "error_details": "You cannot create multiple seller profiles for the same user."
+                }
+            }
+            return Response(response_data)
 
-            # Retrieve the created seller profile instance
-            seller_profile_instance = serializer.instance
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(user=user)
 
-            # Send email with seller profile data to the company
-            email_subject = 'New Seller Profile Submission'
-            email_body = f"A new seller profile has been submitted by {user.email}.\n\nSeller Profile Data:\n{seller_profile_instance}\n\nPlease review and verify the seller."
-            sender_email = user.email  # Use the user's email
-            receiver_email = settings.DEFAULT_FROM_EMAIL
+        user.is_merchant = True
+        user.save()
 
-            try:
-                send_mail(email_subject, email_body, sender_email, [receiver_email], fail_silently=False)
-                return Response({'message': 'Seller profile created successfully'}, status=status.HTTP_201_CREATED)
-            except Exception as e:
-                # Handle email sending error
-                return Response({'error': 'Failed to send email'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        else:
-            return Response({'error': 'User ID not found'}, status=status.HTTP_401_UNAUTHORIZED)
- 
+        # Retrieve the created seller profile instance
+        seller_profile_instance = serializer.instance
+        seller_profile_data = serializer.data
+
+        formatted_data = "\n".join([f"{field}: {seller_profile_data.get(field)}" for field in seller_profile_data])
+
+        # Send email with seller profile data to the company
+        email_subject = 'New Seller Profile Submission'
+        email_body = f"A new seller profile has been submitted by {user.email}.\n\nSeller Profile Data:\n{seller_profile_instance}\n\n{formatted_data}\n\nPlease review and verify the seller."
+        sender_email = user.email  # Use the user's email
+        receiver_email = settings.DEFAULT_FROM_EMAIL
+        
+        email_subject2 = 'Seller Profile Recieved'
+        email_body2 = f"Hello {user.first_name} {user.last_name},\nYour seller profile has been received and it's being reviewed by the team.\nThis review process could last for 3 to 5 working days, Pls exercise patience.\nKeep an eye on your inbox, you will recieve an email once we verify you.\n And if your profile didn't pass the checks, you would also get an email indicating the reason."
+        sender_email2 = settings.DEFAULT_FROM_EMAIL  # Use the user's email
+        receiver_email2 = user.email
+
+        try:
+            send_mail(email_subject, email_body, sender_email, [receiver_email], fail_silently=False)
+            send_mail(email_subject2, email_body2, sender_email2, [receiver_email2], fail_silently=False)
+            message = 'Seller profile created successfully'
+            response_data = {
+                "message": message,
+                "status": status.HTTP_201_CREATED,
+                "data": seller_profile_data
+            }
+            return Response(response_data)
+        except Exception as e:
+            message = 'Email unsuccessful'
+            response_data = {
+                "message": message,
+                "status": status.HTTP_500_INTERNAL_SERVER_ERROR,
+                "data": {
+                    "error_details": "Failed to send email."
+                }
+            }
+            return Response(response_data)
 
 
 
 
 # Endpoint to verify a seller profile
 class SellerVerificationView(generics.UpdateAPIView):
-    serializer_class = SellerVerificationSerializer
-    permission_classes = [IsAdmin]
-    queryset = CustomUser.objects.all()  # Define the queryset
+    serializer_class = SellerVerificationSerializer  # Serializer for seller verification
+    permission_classes = [IsAdmin]  # Admin permission required for verification
+    queryset = SellerProfile.objects.all()  # Queryset to get SellerProfile instances
+    lookup_field = 'id'  # Field to lookup seller profile by ID
 
+    def update(self, request, *args, **kwargs):
+        seller_profile = self.get_object()  # Retrieve the seller profile instance
+        serializer = self.get_serializer(seller_profile, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(is_verified=True)  # Set the seller profile as verified
 
-    def perform_create(self, serializer):
-        user_id = get_user_id_from_jwt(self.request)
-        if user_id:
-            user = self.request.user  # Access the authenticated user
+        # Notify the seller via email or other means
+        email_subject = 'Seller Profile Verified'
+        email_body = f"Your seller profile with ID: {seller_profile.id} has been verified."
+        receiver_email = seller_profile.user.email  # Use the user's email
 
-            serializer.save(user=user)  # Save the serializer passing the user instance
+        try:
+            send_mail(email_subject, email_body, settings.DEFAULT_FROM_EMAIL, [receiver_email], fail_silently=False)
+        except Exception as e:
+            # Handle email sending error (optional)
+            pass
 
-            user.is_merchant = True
-            user.save()
-
-            # Retrieve the created seller profile instance
-            seller_profile_instance = serializer.instance
-
-            # Send email with seller profile data to the company
-            email_subject = 'New Seller Profile Submission'
-            email_body = f"A new seller profile has been submitted by {user.email}.\n\nSeller Profile Data:\n{seller_profile_instance}\n\nPlease review and verify the seller."
-            sender_email = user.email  # Use the user's email
-            receiver_email = settings.DEFAULT_FROM_EMAIL
-
-            try:
-                send_mail(email_subject, email_body, sender_email, [receiver_email], fail_silently=False)
-                return Response({'message': 'Seller profile created successfully'}, status=status.HTTP_201_CREATED)
-            except Exception as e:
-                # Handle email sending error
-                return Response({'error': 'Failed to send email'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        else:
-            return Response({'error': 'User ID not found'}, status=status.HTTP_401_UNAUTHORIZED)
-
+        return Response({'message': 'Seller profile verified successfully'}, status=status.HTTP_200_OK)
     
+
+
+class SellerProfileRetrieveUpdateView(generics.RetrieveUpdateAPIView):
+    serializer_class = SellerProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        # Retrieve the authenticated user
+        user = self.request.user
+
+        # Get the seller profile instance related to the user
+        try:
+            seller_profile = SellerProfile.objects.get(user=user)
+            self.check_object_permissions(self.request, seller_profile)
+            return seller_profile
+        except SellerProfile.DoesNotExist:
+            # If the seller profile doesn't exist, you may create a new one here
+            return Response
+
+# class SellerProfileRetrieveDestroyView(generics.RetrieveDestroyAPIView):
+#     serializer_class = SellerProfileSerializer
+#     permission_classes = [IsAuthenticated]
+
+#     def get_object(self):
+#         # Retrieve the authenticated user
+#         user = self.request.user
+
+#         # Get the seller profile instance related to the user
+#         try:
+#             seller_profile = SellerProfile.objects.get(user=user)
+#             self.check_object_permissions(self.request, seller_profile)
+#             return seller_profile
+#         except SellerProfile.DoesNotExist:
+#             # If the seller profile doesn't exist, return 404 Not Found
+#             return Response("Seller profile does not exist for this user.")
+
 
 
 

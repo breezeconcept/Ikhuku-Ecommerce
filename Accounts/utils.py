@@ -2,6 +2,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.renderers import JSONRenderer
 
 def get_user_id_from_jwt(request):
     """
@@ -22,3 +23,17 @@ def get_user_id_from_jwt(request):
         return Response({"error": str(e)}, status=status.HTTP_403_FORBIDDEN)
     
     return user_id
+
+
+
+
+
+
+class CustomRenderer(JSONRenderer):
+    def render(self, data, accepted_media_type=None, renderer_context=None):
+        response_data = {
+            "message": "Successful",
+            "status": 200,
+            "data": data
+        }
+        return super().render(response_data, accepted_media_type, renderer_context)

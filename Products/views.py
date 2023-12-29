@@ -4,6 +4,8 @@ from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from .models import Product, Category
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.pagination import PageNumberPagination
+from Accounts.permissions import IsMerchant
+from Accounts.models import SellerProfile
 
 from .serializers import (
     ProductFilter,
@@ -15,7 +17,7 @@ from .serializers import (
      MerchantProductDetailSerializer,
      MerchantProductCreateSerializer,
      MerchantProductUpdateSerializer,
-     MerchantProductDeleteSerializer
+    #  MerchantProductDeleteSerializer
      )
 
 
@@ -179,51 +181,54 @@ class MerchantProductDetailView(generics.RetrieveAPIView):
 ##########  TO CREATE A PRODUCT
 ##########   Endpoint can only be accessed by sellers 
 
+# class MerchantProductCreateView(generics.CreateAPIView):
+#     serializer_class = MerchantProductCreateSerializer
+#     permission_classes = [IsMerchant]  # Only authenticated merchants can create products
+
+#     def perform_create(self, serializer):
+#         serializer.save(user=self.request.user)  # Assign the logged-in user as the merchant
+
+
+##########  TO CREATE A PRODUCT
+##########   Endpoint can only be accessed by sellers
+# class MerchantProductCreateView(generics.CreateAPIView):
+#     serializer_class = MerchantProductCreateSerializer
+#     permission_classes = [IsMerchant]
+
+
+#     def post(self, request, *args, **kwargs):
+#         user = self.request.user
+#         seller = SellerProfile.objects.get(user=user)
+
+#         serializer = self.get_serializer(data=request.data)
+#         serializer.is_valid(raise_exception=True)
+#         serializer.save(user=user, seller=seller)
+
+
 class MerchantProductCreateView(generics.CreateAPIView):
     serializer_class = MerchantProductCreateSerializer
-    permission_classes = [IsAuthenticated]  # Only authenticated merchants can create products
+    permission_classes = [IsMerchant]
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)  # Assign the logged-in user as the merchant
+        user=self.request.user
+        seller=self.request.user.sellerprofile
+        serializer.save(user=user, seller=seller)
 
 
-
-
-
+        
 
 ##########  TO UPDATE A PRODUCT
 ##########   Endpoint can only be accessed by sellers (ONLY THE PRODUCTS CREATED BY THEM)
 
-class MerchantProductUpdateView(generics.UpdateAPIView):
+class MerchantProductUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Product.objects.all()
     serializer_class = MerchantProductUpdateSerializer
     lookup_field = 'id'  # Replace with the identifier used in your Product model
-    permission_classes = [IsAuthenticated]  # Only authenticated merchants can update/delete products
+    permission_classes = [IsMerchant]  # Only authenticated merchants can update/delete products
 
-    def get_queryset(self):
-        merchant = self.request.user  # Replace this with your logic to retrieve the merchant
-        return Product.objects.filter(merchant=merchant)
-
-
-
-
-
-
-##########  TO DELETE A PRODUCT
-##########   Endpoint can only be accessed by sellers (ONLY THE PRODUCTS CREATED BY THEM)
-
-class MerchantProductDeleteView(generics.DestroyAPIView):
-    queryset = Product.objects.all()
-    serializer_class = MerchantProductDeleteSerializer
-    lookup_field = 'id'  # Replace with the identifier used in your Product model
-    permission_classes = [IsAuthenticated]  # Only authenticated merchants can update/delete products
-
-    def get_queryset(self):
-        merchant = self.request.user  # Replace this with your logic to retrieve the merchant
-        return Product.objects.filter(merchant=merchant)
-
-
-
+    # def get_queryset(self):
+    #     merchant = self.request.user  # Replace this with your logic to retrieve the merchant
+    #     return Product.objects.filter(merchant=merchant)
 
 
 
