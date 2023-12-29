@@ -34,10 +34,10 @@ class MerchantProductListSerializer(serializers.ModelSerializer):
         model = Product
         fields = '__all__'
 
-class MerchantProductDetailSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Product
-        fields = '__all__'
+# class MerchantProductDetailSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Product
+#         fields = '__all__'
 
 class MerchantProductCreateSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(read_only=True, default=serializers.CurrentUserDefault())
@@ -49,7 +49,7 @@ class MerchantProductCreateSerializer(serializers.ModelSerializer):
         model = Product
         fields = '__all__'
 
-class MerchantProductUpdateSerializer(serializers.ModelSerializer):
+class MerchantProductUpdateDestroySerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(read_only=True)
     seller = serializers.PrimaryKeyRelatedField(read_only=True)
     category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())

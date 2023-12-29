@@ -42,7 +42,7 @@ urlpatterns = [
     path('password/reset/confirm/<str:uidb64>/<str:token>/', PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('password/change/', ChangePasswordView.as_view(), name='change-password'),
 
-    path('seller-profile/', SellerProfileCreateView.as_view(), name='create-seller-profile'),
+    path('seller-profile-create/', SellerProfileCreateView.as_view(), name='create-seller-profile'),
     path('seller-profile/<uuid:id>/', SellerVerificationView.as_view(), name='verify-seller'),
     # path('seller-profile/', SellerProfileListView.as_view(), name='create-seller-profile'),
     path('seller-profile/', SellerProfileRetrieveUpdateView.as_view(), name='seller-profile'),

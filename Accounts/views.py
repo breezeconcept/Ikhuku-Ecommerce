@@ -211,19 +211,19 @@ class PasswordResetConfirmView(APIView):
 
 
 # Endpoint to logout a user
-class UserLogoutView(APIView):
-    permission_classes = (IsAuthenticated,)
+# class UserLogoutView(APIView):
+#     permission_classes = (IsAuthenticated,)
 
-    def post(self, request):
-        try:
-            # Get the user's token and delete it
-            token = Token.objects.get(user=request.user)
-            token.delete()
-            return Response({"message": "Logout successful."}, status=status.HTTP_200_OK)
-        except Token.DoesNotExist:
-            return Response({"error": "User is not logged in."}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+#     def post(self, request):
+#         try:
+#             # Get the user's token and delete it
+#             token = Token.objects.get(user=request.user)
+#             token.delete()
+#             return Response({"message": "Logout successful."}, status=status.HTTP_200_OK)
+#         except Token.DoesNotExist:
+#             return Response({"error": "User is not logged in."}, status=status.HTTP_400_BAD_REQUEST)
+#         except Exception as e:
+#             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
 
 
@@ -349,6 +349,11 @@ class SellerProfileRetrieveUpdateView(generics.RetrieveUpdateAPIView):
     serializer_class = SellerProfileSerializer
     permission_classes = [IsAuthenticated]
 
+    def get(self, request, *args, **kwargs):
+        seller_profile = self.get_object()
+        serializer = self.get_serializer(seller_profile)
+        return Response(serializer.data)
+
     def get_object(self):
         # Retrieve the authenticated user
         user = self.request.user
@@ -359,8 +364,10 @@ class SellerProfileRetrieveUpdateView(generics.RetrieveUpdateAPIView):
             self.check_object_permissions(self.request, seller_profile)
             return seller_profile
         except SellerProfile.DoesNotExist:
-            # If the seller profile doesn't exist, you may create a new one here
-            return Response
+            # If the seller profile doesn't exist, return an appropriate response
+            return Response("Seller profile does not exist for this user.", status=status.HTTP_404_NOT_FOUND)
+    
+
 
 # class SellerProfileRetrieveDestroyView(generics.RetrieveDestroyAPIView):
 #     serializer_class = SellerProfileSerializer
@@ -387,6 +394,7 @@ class GrantStaffRightsView(generics.UpdateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = CreateUserSerializer
     permission_classes = [IsAuthenticated, IsSuperUserOrReadOnly]
+    lookup_field = 'id'
 
     def put(self, request, *args, **kwargs):
         user = self.get_object()
@@ -401,6 +409,7 @@ class RevokeStaffRightsView(generics.UpdateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = CreateUserSerializer
     permission_classes = [IsAuthenticated, IsSuperUserOrReadOnly]
+    lookup_field = 'id'
 
     def put(self, request, *args, **kwargs):
         user = self.get_object()
@@ -415,6 +424,7 @@ class GrantAdminRightsView(generics.UpdateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = CreateUserSerializer
     permission_classes = [IsAdminUser]
+    lookup_field = 'id'
 
     def put(self, request, *args, **kwargs):
         user = self.get_object()
@@ -429,6 +439,7 @@ class RevokeAdminRightsView(generics.UpdateAPIView):
     queryset = CustomUser.objects.all()
     serializer_class = CreateUserSerializer
     permission_classes = [IsAdminUser]
+    lookup_field = 'id'
 
     # @swagger_auto_schema(tags=['revoke-admin-rights'], operation_summary="Your one-line description here")
     @swagger_auto_schema(operation_summary="Your one-line description here")

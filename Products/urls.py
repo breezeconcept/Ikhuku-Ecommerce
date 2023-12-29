@@ -12,7 +12,7 @@ from .views import (
     ProductDetailView, 
 
     MerchantProductListView, 
-    MerchantProductDetailView, 
+    # MerchantProductDetailView, 
     MerchantProductCreateView,
     MerchantProductUpdateDestroyView,
     # MerchantProductDeleteView
@@ -31,7 +31,6 @@ urlpatterns = [
     
     ##############    To create category (for admins)
     path('categories/create/', CategoryCreateView.as_view(), name='category-create'),
-
     path('categories/<uuid:id>/update/', CategoryUpdateView.as_view(), name='category-update'),
     path('categories/<uuid:id>/delete/', CategoryDeleteView.as_view(), name='category-delete'),
 
@@ -41,7 +40,7 @@ urlpatterns = [
 
     # FOR SELLERS
     path('merchant/products/getAll/', MerchantProductListView.as_view(), name='merchant-product-list'),
-    path('merchant/products/get/<uuid:id>/', MerchantProductDetailView.as_view(), name='merchant-product-detail'),
+    # path('merchant/products/get/<uuid:id>/', MerchantProductDetailView.as_view(), name='merchant-product-detail'),
     path('merchant/products/create/', MerchantProductCreateView.as_view(), name='product-create'),
     path('merchant/products/<uuid:id>/', MerchantProductUpdateDestroyView.as_view(), name='product-update-delete'),
     # path('merchant/products/<uuid:id>/', MerchantProductDeleteView.as_view(), name='product-update-delete'),
