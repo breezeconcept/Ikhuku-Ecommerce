@@ -43,6 +43,7 @@ class MerchantProductCreateSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(read_only=True, default=serializers.CurrentUserDefault())
     seller = serializers.PrimaryKeyRelatedField(read_only=True)
     category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())
+    image = serializers.ImageField()
 
     class Meta:
         model = Product
@@ -52,7 +53,8 @@ class MerchantProductUpdateSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(read_only=True)
     seller = serializers.PrimaryKeyRelatedField(read_only=True)
     category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())
-    
+    image = serializers.ImageField()
+
     class Meta:
         model = Product
         fields = '__all__'

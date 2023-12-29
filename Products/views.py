@@ -6,6 +6,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.pagination import PageNumberPagination
 from Accounts.permissions import IsMerchant
 from Accounts.models import SellerProfile
+from rest_framework import generics, status
+from rest_framework.response import Response
 
 from .serializers import (
     ProductFilter,
@@ -205,14 +207,26 @@ class MerchantProductDetailView(generics.RetrieveAPIView):
 #         serializer.save(user=user, seller=seller)
 
 
+# class MerchantProductCreateView(generics.CreateAPIView):
+#     serializer_class = MerchantProductCreateSerializer
+#     permission_classes = [IsMerchant]
+
+#     def perform_create(self, serializer):
+#         user=self.request.user
+#         seller=self.request.user.sellerprofile
+#         serializer.save(user=user, seller=seller)
+
 class MerchantProductCreateView(generics.CreateAPIView):
     serializer_class = MerchantProductCreateSerializer
     permission_classes = [IsMerchant]
 
-    def perform_create(self, serializer):
-        user=self.request.user
+    def post(self, request, *args, **kwargs):
+        user = self.request.user
         seller=self.request.user.sellerprofile
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
         serializer.save(user=user, seller=seller)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
         
