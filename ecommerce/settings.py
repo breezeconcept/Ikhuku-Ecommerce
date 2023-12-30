@@ -107,7 +107,7 @@ REST_FRAMEWORK = {
         # Other authentication classes can be added here if needed
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 12,  # Set the number of items per page here
+    'PAGE_SIZE': 15,  # Set the number of items per page here
     # 'DEFAULT_RENDERER_CLASSES': [
     #     # 'ecommerce/utils/CustomRenderer',
     #     'rest_framework.renderers.JSONRenderer',
