@@ -4,6 +4,7 @@ from Products.serializers import ProductSerializer  # Import your Product serial
 
 class CartItemSerializer(serializers.ModelSerializer):
     product = ProductSerializer()  # Assuming you have a ProductSerializer for the Product model
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
 
     class Meta:
         model = CartItem
