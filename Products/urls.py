@@ -15,7 +15,8 @@ from .views import (
     # MerchantProductDetailView, 
     MerchantProductCreateView,
     MerchantProductUpdateDestroyView,
-    # MerchantProductDeleteView
+    # MerchantProductDeleteView,
+    CheckProductFavouriteView
     )
 
 
@@ -44,5 +45,7 @@ urlpatterns = [
     path('merchant/products/create/', MerchantProductCreateView.as_view(), name='product-create'),
     path('merchant/products/<uuid:id>/', MerchantProductUpdateDestroyView.as_view(), name='product-update-delete'),
     # path('merchant/products/<uuid:id>/', MerchantProductDeleteView.as_view(), name='product-update-delete'),
+
+    path('check-favorite/<uuid:product_id>/', CheckProductFavouriteView.as_view(), name='check-favorite'),
 
 ]

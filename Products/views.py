@@ -9,6 +9,8 @@ from Accounts.models import SellerProfile
 from rest_framework import generics, status
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
+from Whishlist.models import Favorite
+from rest_framework.views import APIView
 
 from .serializers import (
     ProductFilter,
@@ -219,4 +221,19 @@ class MerchantProductUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
         self.check_object_permissions(self.request, obj)
         return obj
 
+
+
+
+
+
+class CheckProductFavouriteView(APIView):
+    def get(self, request, product_id):
+        user = request.user
+        product = get_object_or_404(Product, id=product_id)
+        
+        # Check if the product exists in the user's favorites
+        is_favourite = Favorite.objects.filter(user=user, product=product).exists()
+
+        # Return response indicating if the product is a favorite or not
+        return Response({'is_favourite': is_favourite}, status=status.HTTP_200_OK)
 
