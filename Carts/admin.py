@@ -1,9 +1,10 @@
 from django.contrib import admin
 from .models import CartItem
-from django.contrib.auth.admin import UserAdmin
 
 
-# class CustomUserAdmin(UserAdmin):
-#     readonly_fields = ('id',)
 
-# admin.site.register(CartItem, CustomUserAdmin)
+class CartItemAdmin(admin.ModelAdmin):
+    readonly_fields = ('id',)  # Define readonly fields if needed
+    list_display = ('id', 'product', 'quantity', 'user')  # Display fields in the list view
+
+admin.site.register(CartItem, CartItemAdmin)

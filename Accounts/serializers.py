@@ -75,3 +75,18 @@ class ResetPasswordSerializer(serializers.Serializer):
         model = CustomUser
         fields = ['email']
 
+class ResetPasswordConfirmSerializer(serializers.Serializer):
+    password = serializers.CharField()
+
+    class Meta:
+        model = CustomUser
+        fields = ['password']
+
+
+# class ChangePasswordSerializer(serializers.ModelSerializer):
+
+#     class Meta:
+#         model = CustomUser
+#         fields = ['password']  # Empty fields as it's only for verification
+#         extra_kwargs = {'password': {'write_only': True}}
+

@@ -7,7 +7,7 @@ from .serializers import (
     EmailVerificationSerializer, 
     SellerProfileSerializer,
     SellerVerificationSerializer,
-    ResetPasswordSerializer 
+    ResetPasswordSerializer, ResetPasswordConfirmSerializer
     )
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
@@ -186,7 +186,8 @@ class PasswordResetRequestView(APIView):
 
 UserModel = get_user_model()
 
-class PasswordResetConfirmView(APIView):
+class PasswordResetConfirmView(generics.CreateAPIView):
+    serializer_class = ResetPasswordConfirmSerializer
     def post(self, request, uidb64, token):
         try:
             uid = force_str(urlsafe_base64_decode(uidb64))
@@ -197,7 +198,7 @@ class PasswordResetConfirmView(APIView):
         if user and PasswordResetTokenGenerator().check_token(user, token):
             # Handle the password reset logic here
             # Example: Reset the user's password
-            new_password = request.data.get('new_password')
+            new_password = request.data.get('password')
 
             if new_password:
                 user.set_password(new_password)
