@@ -14,7 +14,7 @@ def send_verification_email(sender, instance, created, **kwargs):
 
         send_mail(
             'Verify your email',
-            f'Please click the link to verify your email: {verification_url}',
+            f'Please click the link to verify your email: {verification_url}\n\nNote: Upon clicking the link, You will be redirected to our temporary verification page.\nThen click the PUT button at the bottom right of the page\n\nAfter that, you can now visit https://ikhuku.netlify.app/login to sign in.',
             settings.DEFAULT_FROM_EMAIL,
             [instance.email],
             fail_silently=False,

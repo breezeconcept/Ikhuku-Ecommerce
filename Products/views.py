@@ -202,16 +202,21 @@ class MerchantProductCreateView(generics.CreateAPIView):
 
 class MerchantProductUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = MerchantProductUpdateDestroySerializer
-    lookup_field = 'id' 
     permission_classes = [IsMerchant] 
+    lookup_field = 'id' 
+    
 
     def get_queryset(self):
         # Retrieve the SellerProfile instance related to the authenticated user
         seller_profile = get_object_or_404(SellerProfile, user=self.request.user)
 
-        # Retrieve the specific product associated with the authenticated seller
-        seller_product = get_object_or_404(Product, seller=seller_profile)
+        # Retrieve all products associated with the authenticated seller
+        return Product.objects.filter(seller=seller_profile)
 
-        return Product.objects.filter(id=seller_product.id)
+    def get_object(self):
+        queryset = self.get_queryset()
+        obj = get_object_or_404(queryset, id=self.kwargs['id'])
+        self.check_object_permissions(self.request, obj)
+        return obj
 
 
