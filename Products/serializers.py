@@ -13,6 +13,12 @@ class ProductFilter(filters.FilterSet):
         fields = ['name', 'description']
 
 
+class ProductSearchSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = '__all__'     
+
+
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category

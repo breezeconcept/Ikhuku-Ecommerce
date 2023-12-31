@@ -22,7 +22,8 @@ from .serializers import (
     #  MerchantProductDetailSerializer,
      MerchantProductCreateSerializer,
      MerchantProductUpdateDestroySerializer,
-    #  MerchantProductDeleteSerializer
+    #  MerchantProductDeleteSerializer,
+    ProductSearchSerializer
      )
 
 
@@ -81,6 +82,23 @@ class ProductByCategoryView(generics.ListAPIView):
     def get_queryset(self):
         category_id = self.kwargs['category_id']
         return Product.objects.filter(category_id=category_id)
+    
+
+class ProductBySearchView(generics.ListAPIView):
+    serializer_class = ProductSearchSerializer
+    pagination_class = PageNumberPagination
+    permission_classes = [AllowAny]
+
+
+    def get_queryset(self):
+        search_query = self.request.query_params.get('search')
+        if search_query:
+            # Assuming 'name' or any field in Product model to be searched
+            queryset = Product.objects.filter(name__icontains=search_query)
+            return queryset
+        else:
+            # Return all products if no search query is provided
+            return Product.objects.all()
     
 
 

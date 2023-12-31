@@ -16,13 +16,16 @@ from .views import (
     MerchantProductCreateView,
     MerchantProductUpdateDestroyView,
     # MerchantProductDeleteView,
-    CheckProductFavouriteView
+    CheckProductFavouriteView,
+    ProductBySearchView
     )
 
 
 urlpatterns = [
     ############    For search 
-    path('products/search/', ProductsSearchView.as_view(), name='product-search'),
+    path('products/filter/', ProductsSearchView.as_view(), name='product-search'),
+
+    path('products/search/', ProductBySearchView.as_view(), name='product-search'),
 
     #############   Get all categories
     path('categories/', CategoryListView.as_view(), name='category-list'),
