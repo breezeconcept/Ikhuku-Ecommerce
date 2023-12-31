@@ -2,7 +2,7 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from .models import Favorite
-from .serializers import FavoriteSerializer
+from .serializers import FavoriteSerializer, FavoriteSerializer2
 from rest_framework.pagination import PageNumberPagination
 from Products.models import Product
 from rest_framework.views import APIView
@@ -10,13 +10,35 @@ from rest_framework.views import APIView
 
 
 class FavoriteListView(generics.ListAPIView):
-    serializer_class = FavoriteSerializer
+    serializer_class = FavoriteSerializer2
     permission_classes = [IsAuthenticated]
     pagination_class = PageNumberPagination
 
     def get_queryset(self):
         user=self.request.user
         return Favorite.objects.filter(user=user)
+    
+
+
+
+class FavoriteItemDetailView(generics.RetrieveAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = FavoriteSerializer2
+
+    def get_queryset(self):
+        user = self.request.user
+        return Favorite.objects.filter(user=user)
+
+    def retrieve(self, request, product_id):
+        user = request.user
+        favorite_item = Favorite.objects.filter(user=user, product_id=product_id).first()
+
+        if favorite_item:
+            serializer = self.serializer_class(favorite_item)
+            return Response(serializer.data)
+        else:
+            return Response({'error': 'Product not found in favorites'}, status=status.HTTP_404_NOT_FOUND)
+
 
 
 class FavoriteCreateView(generics.CreateAPIView):
@@ -43,6 +65,21 @@ class FavoriteCreateView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         serializer.save(user=user, is_favourite=True)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    
+
+class FavoriteRemoveView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, product_id):
+        user = request.user
+        favorite_item = Favorite.objects.filter(user=user, product_id=product_id).first()
+
+        if favorite_item:
+            favorite_item.delete()
+            return Response({'message': 'Product removed from favorites successfully'}, status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response({'error': 'Product not found in favorites'}, status=status.HTTP_404_NOT_FOUND)
+
 
 
 
@@ -73,24 +110,12 @@ class FavoriteCreateView(generics.CreateAPIView):
     
 
 
-class FavoriteDeleteView(generics.DestroyAPIView):
-    queryset = Favorite.objects.all()
-    serializer_class = FavoriteSerializer
-    permission_classes = [IsAuthenticated]
-    lookup_field = 'id' 
+# class FavoriteDeleteView(generics.DestroyAPIView):
+#     queryset = Favorite.objects.all()
+#     serializer_class = FavoriteSerializer
+#     permission_classes = [IsAuthenticated]
+#     lookup_field = 'id' 
 
 
-class FavoriteRemoveView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def delete(self, request, product_id):
-        user = request.user
-        favorite_item = Favorite.objects.filter(user=user, product_id=product_id).first()
-
-        if favorite_item:
-            favorite_item.delete()
-            return Response({'message': 'Product removed from favorites successfully'}, status=status.HTTP_204_NO_CONTENT)
-        else:
-            return Response({'error': 'Product not found in favorites'}, status=status.HTTP_404_NOT_FOUND)
 
 

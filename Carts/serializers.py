@@ -9,3 +9,13 @@ class CartItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = CartItem
         fields = ['id', 'product', 'quantity', 'user']
+
+
+class CartItemSerializer2(serializers.ModelSerializer):
+    product = ProductSerializer()  # Assuming you have a ProductSerializer for the Product model
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
+
+    class Meta:
+        model = CartItem
+        fields = ['id', 'product', 'quantity', 'user']
+

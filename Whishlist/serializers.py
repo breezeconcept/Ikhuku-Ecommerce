@@ -9,5 +9,10 @@ class FavoriteSerializer(serializers.ModelSerializer):
         model = Favorite
         fields = '__all__'
 
-
+class FavoriteSerializer2(serializers.ModelSerializer):
+    product = ProductSerializer()
+    user = serializers.PrimaryKeyRelatedField(read_only=True)
+    class Meta:
+        model = Favorite
+        fields = '__all__'
 
