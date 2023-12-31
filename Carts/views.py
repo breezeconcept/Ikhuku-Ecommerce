@@ -4,6 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from .models import CartItem
 from .serializers import CartItemSerializer
 # from django.db import IntegrityError
+from rest_framework.views import APIView
 
         
 
@@ -54,4 +55,18 @@ class CartItemDetailView(generics.RetrieveUpdateDestroyAPIView):
     
         
 
- 
+class CartItemRemoveView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, product_id):
+        user = request.user
+        cart_item = CartItem.objects.filter(user=user, product_id=product_id).first()
+
+        if cart_item:
+            cart_item.delete()
+            return Response({'message': 'Product removed from cart successfully'}, status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response({'error': 'Product not found in cart'}, status=status.HTTP_404_NOT_FOUND)
+
+
+

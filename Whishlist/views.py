@@ -5,6 +5,7 @@ from .models import Favorite
 from .serializers import FavoriteSerializer
 from rest_framework.pagination import PageNumberPagination
 from Products.models import Product
+from rest_framework.views import APIView
 
 
 
@@ -77,3 +78,19 @@ class FavoriteDeleteView(generics.DestroyAPIView):
     serializer_class = FavoriteSerializer
     permission_classes = [IsAuthenticated]
     lookup_field = 'id' 
+
+
+class FavoriteRemoveView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, product_id):
+        user = request.user
+        favorite_item = Favorite.objects.filter(user=user, product_id=product_id).first()
+
+        if favorite_item:
+            favorite_item.delete()
+            return Response({'message': 'Product removed from favorites successfully'}, status=status.HTTP_204_NO_CONTENT)
+        else:
+            return Response({'error': 'Product not found in favorites'}, status=status.HTTP_404_NOT_FOUND)
+
+
