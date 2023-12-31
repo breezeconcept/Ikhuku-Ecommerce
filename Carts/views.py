@@ -48,7 +48,7 @@ class CartItemCreateView(generics.CreateAPIView):
 
 class CartItemUpdateView(generics.UpdateAPIView):
     permission_classes = [IsAuthenticated]
-    serializer_class = CartItemSerializer2
+    serializer_class = CartItemSerializer
 
     def get_queryset(self):
         user = self.request.user
