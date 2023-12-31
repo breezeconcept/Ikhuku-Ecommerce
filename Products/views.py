@@ -29,6 +29,53 @@ from .serializers import (
 
 
 
+class ProductFilterView(generics.ListAPIView):
+    serializer_class = ProductSerializer
+    pagination_class = PageNumberPagination
+    permission_classes = [AllowAny]
+
+
+        
+        
+
+    def get_queryset(self):
+        queryset = Product.objects.all()
+
+        # Filter by search query
+        search_query = self.request.query_params.get('search')
+        if search_query:
+            queryset = queryset.filter(name__icontains=search_query)
+
+        # Filter by category
+        # category = self.request.query_params.get('category')
+        # if category:
+        #     queryset = queryset.filter(category=category)
+        category_name = self.request.query_params.get('category')
+        if category_name:
+            # Filter products by category name
+            queryset = queryset.filter(category__name__iexact=category_name)
+
+        # Filter by unique price upwards
+        unique_price_up = self.request.query_params.get('unique_price_up')
+        if unique_price_up:
+            queryset = queryset.filter(price__gte=unique_price_up)
+
+        # Filter by unique price downwards
+        unique_price_down = self.request.query_params.get('unique_price_down')
+        if unique_price_down:
+            queryset = queryset.filter(price__lte=unique_price_down)
+
+
+        # Filter by price range (min_price and max_price)
+        min_price = self.request.query_params.get('min_price')
+        max_price = self.request.query_params.get('max_price')
+        if min_price and max_price:
+            queryset = queryset.filter(price__range=(min_price, max_price))
+
+        return queryset.distinct()
+
+
+
 
 ############  This is for pagination
 

@@ -1,9 +1,9 @@
 from django.urls import path
 from .views import (
-    ProductsSearchView,
+    # ProductsSearchView,
 
     CategoryListView,
-    ProductByCategoryView,
+    # ProductByCategoryView,
     CategoryCreateView,
     CategoryUpdateView,
     CategoryDeleteView,
@@ -17,21 +17,23 @@ from .views import (
     MerchantProductUpdateDestroyView,
     # MerchantProductDeleteView,
     CheckProductFavouriteView,
-    ProductBySearchView
+    # ProductBySearchView,
+    ProductFilterView
     )
 
 
 urlpatterns = [
     ############    For search 
-    path('products/filter/', ProductsSearchView.as_view(), name='product-search'),
+    path('products/sort/', ProductFilterView.as_view(), name='product-filter'),
+    # path('products/filter/', ProductsSearchView.as_view(), name='product-search'),
 
-    path('products/search/', ProductBySearchView.as_view(), name='product-search'),
+    # path('products/search/', ProductBySearchView.as_view(), name='product-search'),
 
     #############   Get all categories
     path('categories/', CategoryListView.as_view(), name='category-list'),
 
     #############    Get products by category
-    path('categories/<uuid:category_id>/products/', ProductByCategoryView.as_view(), name='products-by-category'),
+    # path('categories/<uuid:category_id>/products/', ProductByCategoryView.as_view(), name='products-by-category'),
     
     ##############    To create category (for admins)
     path('categories/create/', CategoryCreateView.as_view(), name='category-create'),
