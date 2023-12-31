@@ -6,16 +6,40 @@ from .serializers import CartItemSerializer, CartItemSerializer2
 # from django.db import IntegrityError
 from rest_framework.views import APIView
 from rest_framework.pagination import PageNumberPagination
+from django.db.models import F, Sum
 
 
-class CartItemListView(generics.ListAPIView):
-    serializer_class = CartItemSerializer2
+
+class CartItemListView(APIView):
+    # serializer_class = CartItemSerializer2
     permission_classes = [IsAuthenticated]
     pagination_class = PageNumberPagination
 
-    def get_queryset(self):
+    def get(self, request):
         user = self.request.user
-        return CartItem.objects.filter(user=user)
+        cart_items = CartItem.objects.filter(user=user)
+        total_price = cart_items.aggregate(total_price=Sum(F('product__price') * F('quantity'))).get('total_price') or 0
+
+
+        serializer = CartItemSerializer2(cart_items, many=True)
+        data = serializer.data
+        data = {
+            'count': len(cart_items),
+            'next': None,
+            'previous': None,
+            'results': serializer.data,
+            'total_price': total_price
+        }
+        return Response(data)
+
+# class CartItemListView(generics.ListAPIView):
+#     serializer_class = CartItemSerializer2
+#     permission_classes = [IsAuthenticated]
+#     pagination_class = PageNumberPagination
+
+#     def get_queryset(self):
+#         user = self.request.user
+#         return CartItem.objects.filter(user=user)
         
 
 
