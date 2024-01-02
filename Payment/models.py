@@ -22,7 +22,8 @@ class Order(models.Model):
     state = models.CharField(max_length=100, blank=True, null=True)
     postal_code = models.CharField(max_length=20, blank=True, null=True)
     is_completed = models.BooleanField(default=False)
-    reference = models.CharField(max_length=100, blank=True, null=True)
+    reference = models.CharField(max_length=100, blank=True, null=True)  # Your system's reference
+    paystack_reference = models.CharField(max_length=100, blank=True, null=True)  # Paystack's reference
     completed_at = models.DateTimeField(auto_now_add=False, blank=True, null=True)
     receipt = models.FileField(upload_to='order_receipt/', blank=True, null=True)
     products = models.ManyToManyField(Product, related_name='orders')  # Assuming ManyToMany relationship with Product

@@ -17,7 +17,7 @@ from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from django.http import HttpResponse
 from io import BytesIO
-
+from django.http import Http404
 
 
 class OrderListView(generics.ListCreateAPIView):
@@ -119,6 +119,7 @@ class OrderUpdateView(APIView):
 
 
 
+
 class PaystackInitiationView(APIView):
     def post(self, request):
         try:
@@ -161,6 +162,13 @@ class PaystackInitiationView(APIView):
 
             # Check if the Paystack initialization was successful
             if response.status_code == 200 and paystack_response.get('status'):
+                # Retrieve the Paystack reference from the response
+                paystack_response_reference = paystack_response.get('data', {}).get('reference')
+
+                # Update the order with Paystack's reference
+                order.paystack_reference = paystack_response_reference
+                order.save()
+
                 # Return the Paystack response to the client
                 return Response(paystack_response, status=status.HTTP_200_OK)
             else:
@@ -176,6 +184,69 @@ class PaystackInitiationView(APIView):
 
 
 
+
+
+# class PaystackInitiationView(APIView):
+#     def post(self, request):
+#         try:
+#             user = self.request.user
+#             order = Order.objects.filter(user=user, is_completed=False, status='pending').first()
+
+#             if order:
+#                 amount = order.total_amount
+#                 amount = float(amount)  # Convert Decimal to float
+#                 email = user.email
+#             else:
+#                 # Create a new order with pending status if one does not exist
+#                 cart_items = CartItem.objects.filter(user=user)
+#                 amount = calculate_total_amount(cart_items)
+#                 order = Order.objects.create(user=user, total_amount=amount, status='pending')
+
+#             reference = str(uuid.uuid4())  # Generate a unique reference for the transaction
+
+#             # Save the reference to the order
+#             order.reference = reference
+#             order.save()
+
+#             # paystack_response_reference = '7PVGX8MEk85tgeEpVDtD'  # Replace this with the actual Paystack reference received in the response
+#             # order.paystack_reference = paystack_response_reference  # Save Paystack's reference
+#             # order.save()
+
+#             paystack_data = {
+#                 'email': email,
+#                 'amount': amount * 100,  # Convert amount to the lowest currency unit (kobo in this case)
+#                 'currency': 'NGN',  # Replace with your desired currency code
+#                 'ref': reference,  # Use the generated reference
+#                 # Add more parameters as needed based on your requirements
+#             }
+
+#             paystack_url = 'https://api.paystack.co/transaction/initialize'
+#             headers = {
+#                 'Authorization': f'Bearer {settings.PAYSTACK_SECRET_KEY}',  # Replace with your Paystack secret key
+#                 'Content-Type': 'application/json',
+#             }
+
+#             # Make a POST request to initialize the transaction
+#             response = requests.post(paystack_url, json=paystack_data, headers=headers)
+#             paystack_response = response.json()
+
+#             # Check if the Paystack initialization was successful
+#             if response.status_code == 200 and paystack_response.get('status'):
+#                 # Return the Paystack response to the client
+#                 return Response(paystack_response, status=status.HTTP_200_OK)
+#             else:
+#                 # Handle Paystack initialization failure
+#                 return Response({'error': 'Paystack initialization failed'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+#         except Order.DoesNotExist:
+#             return Response({'error': 'Pending order not found'}, status=status.HTTP_404_NOT_FOUND)
+#         except Exception as e:
+#             # Handle exceptions or errors during the payment initiation process
+#             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+
+
 class PaystackWebhookView(APIView):
     def post(self, request):
         try:
@@ -183,7 +254,10 @@ class PaystackWebhookView(APIView):
             reference = payload.get('reference')
             status = payload.get('status')
 
-            order = Order.objects.get(reference=reference)
+            try:
+                order = Order.objects.get(paystack_reference=reference)
+            except Order.DoesNotExist:
+                raise Http404('Order not found')
 
             if order:
                 if status == 'success':
@@ -221,9 +295,9 @@ class PaystackWebhookView(APIView):
                 else:
                     return Response({'message': 'Order status not updated'}, status=status.HTTP_400_BAD_REQUEST)
             else:
-                return Response({'error': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
+                return Http404({'error': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
         except Order.DoesNotExist:
-            return Response({'error': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
+            return Http404({'error': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

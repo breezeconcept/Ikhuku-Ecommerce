@@ -43,7 +43,7 @@ urlpatterns = [
     path('password/change/', ChangePasswordView.as_view(), name='change-password'),
 
     path('create-seller-profile/', SellerProfileCreateView.as_view(), name='create-seller-profile'),
-    path('seller-profile/<uuid:id>/', SellerVerificationView.as_view(), name='verify-seller'),
+    path('seller-profile-verify/<uuid:id>/', SellerVerificationView.as_view(), name='verify-seller'),
     # path('seller-profile/', SellerProfileListView.as_view(), name='create-seller-profile'),
     path('seller-profile/', SellerProfileRetrieveUpdateView.as_view(), name='seller-profile'),
     # path('seller-profile-delete/', SellerProfileRetrieveDestroyView.as_view(), name='create-seller-profile'),

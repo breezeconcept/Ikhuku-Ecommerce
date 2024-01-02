@@ -20,6 +20,8 @@ from django.core.mail import send_mail
 from .permissions import IsSuperUserOrReadOnly, IsAdmin
 from django.conf import settings
 
+from django.http import Http404
+
 # from django.contrib.auth.models import User
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.utils.encoding import force_bytes, force_str
@@ -407,7 +409,7 @@ class SellerProfileRetrieveUpdateView(generics.RetrieveUpdateAPIView):
             return seller_profile
         except SellerProfile.DoesNotExist:
             # If the seller profile doesn't exist, return an appropriate response
-            return Response("Seller profile does not exist for this user.", status=status.HTTP_404_NOT_FOUND)
+            return Http404("Seller profile does not exist for this user.", status=status.HTTP_404_NOT_FOUND)
     
 
 
