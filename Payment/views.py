@@ -256,7 +256,8 @@ class PaystackWebhookView(APIView):
             reference = event_data.get('reference')  # Retrieve the 'reference' field from 'data'
 
             print(f"Received reference in webhook payload: {reference}")  # Print the reference value
-            status_value = payload.get('status')
+            # status_value = payload.get('status')
+            status_value = event_data.get('status')
 
             # user = self.request.user
             
