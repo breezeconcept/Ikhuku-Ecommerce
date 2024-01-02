@@ -18,10 +18,13 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from Accounts.views import EmailVerificationView, PasswordResetConfirmView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/user/', include("Accounts.urls")),
+    path('account/verify/<uuid:id>/', EmailVerificationView.as_view(), name='account/verify'),
+    path('password/reset/confirm/<str:uidb64>/<str:token>/', PasswordResetConfirmView.as_view(), name='password/reset/confirm'),
     path('api/user/', include("Products.urls")),
     path('api/user/', include("Carts.urls")),
     path('api/user/', include("Payment.urls")),

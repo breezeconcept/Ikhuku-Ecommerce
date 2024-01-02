@@ -274,29 +274,29 @@ class PaystackWebhookView(APIView):
                     order.is_completed = True
                     order.completed_at = timezone.now()
 
-                    # # Logic to generate the receipt document
-                    # # receipt_content = f"Receipt for Order #{order.id}\nTotal Amount: {order.total_amount}"  # Replace with your receipt content generation logic
-                    # pdf_buffer = generate_pdf_receipt(order)
+                    # Logic to generate the receipt document
+                    # receipt_content = f"Receipt for Order #{order.id}\nTotal Amount: {order.total_amount}"  # Replace with your receipt content generation logic
+                    pdf_buffer = generate_pdf_receipt(order)
 
-                    # # Save the generated receipt to the 'receipt' field
-                    # order.receipt.save(f"receipt_order_{order.id}.txt", pdf_buffer, save=True)
+                    # Save the generated receipt to the 'receipt' field
+                    order.receipt.save(f"receipt_order_{order.id}.txt", pdf_buffer, save=True)
 
-                    # # Sending email to buyer
-                    # buyer_email = order.user.email
-                    # subject_buyer = 'Order Receipt'
-                    # message_buyer = 'Thank you for your order! Please find your receipt attached.'
-                    # send_mail(subject_buyer, message_buyer, settings.EMAIL_HOST_USER, [buyer_email], fail_silently=False, attachment=[order.receipt.path])
+                    # Sending email to buyer
+                    buyer_email = order.user.email
+                    subject_buyer = 'Order Receipt'
+                    message_buyer = 'Thank you for your order! Please find your receipt attached.'
+                    send_mail(subject_buyer, message_buyer, settings.EMAIL_HOST_USER, [buyer_email], fail_silently=False, attachment=[order.receipt.path])
 
-                    # # Sending email to sellers (Replace this logic with actual identification of sellers)
-                    # # For example, if each product has a seller field, you could do something like this:
-                    # # Get all products in the order and notify their sellers
-                    # products = order.products.all()
-                    # sellers_emails = list(products.values_list('seller__user__email', flat=True).distinct())
+                    # Sending email to sellers (Replace this logic with actual identification of sellers)
+                    # For example, if each product has a seller field, you could do something like this:
+                    # Get all products in the order and notify their sellers
+                    products = order.products.all()
+                    sellers_emails = list(products.values_list('seller__user__email', flat=True).distinct())
 
-                    # if sellers_emails:
-                    #     subject_seller = 'New Order Notification'
-                    #     message_seller = f'Your product has been ordered. Order ID: {order.id}'
-                    #     send_mail(subject_seller, message_seller, settings.EMAIL_HOST_USER, sellers_emails, fail_silently=False)
+                    if sellers_emails:
+                        subject_seller = 'New Order Notification'
+                        message_seller = f'Your product has been ordered. Order ID: {order.id}'
+                        send_mail(subject_seller, message_seller, settings.EMAIL_HOST_USER, sellers_emails, fail_silently=False)
 
                     order.save()
 
@@ -311,24 +311,7 @@ class PaystackWebhookView(APIView):
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-# Received reference in webhook payload: 
-# {
-#     'event': 'charge.success', 
-#     'data': {
-#         'id': 3427269065, 
-#         'domain': 'test', 
-#         'status': 'success', 
-#         'reference': 'tx5v4h3ek7', 
-#         'amount': 500000, 
-#         'message': None, 
-#         'gateway_response': 'Successful', 
-#         'paid_at': '2024-01-02T11:31:41.000Z', 
-#         'created_at': '2024-01-02T11:31:11.000Z', 
-#         'channel': 'card', 
-#         'currency': 'NGN', 
-#         'ip_address': '102.89.47.11', 'metadata': '', 'fees_breakdown': None, 'log': None, 'fees': 17500, 'fees_split': None, 'authorization': {'authorization_code': 'AUTH_88icmxi321', 'bin': '408408', 'last4': '4081', 'exp_month': '12', 'exp_year': '2030', 'channel': 'card', 'card_type': 'visa ', 'bank': 'TEST BANK', 'country_code': 'NG', 'brand': 'visa', 'reusable': True, 'signature': 'SIG_TM1zGkrjh9uBMdqWeqAM', 'account_name': None}, 'customer': {'id': 153882116, 'first_name': None, 'last_name': None, 'email': 'codegranites@gmail.com', 'customer_code': 'CUS_itc2p4a5lupad2g', 'phone': None, 'metadata': None, 'risk_action': 'default', 'international_format_phone': None}, 'plan': {}, 'subaccount': {}, 'split': {}, 'order_id': None, 'paidAt': '2024-01-02T11:31:41.000Z', 'requested_amount': 500000, 'pos_transaction_data': None, 'source': {'type': 'api', 'source': 'merchant_api', 'entry_point': 'transaction_initialize', 'identifier': None}
-#     }
-# }
+
 
 def generate_pdf_receipt(order):
     # Create a BytesIO buffer to write the PDF content

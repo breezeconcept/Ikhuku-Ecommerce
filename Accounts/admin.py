@@ -37,5 +37,11 @@ class CustomUserAdmin(UserAdmin):
     readonly_fields = ('id',)
 
 admin.site.register(CustomUser, CustomUserAdmin)
-admin.site.register(SellerProfile)
+
+class CartItemAdmin(admin.ModelAdmin):
+    readonly_fields = ('id',)  # Define readonly fields if needed
+    list_display = ('id', 'user', 'company_name', 'profile_picture', 'business_license', 'is_verified')  # Display fields in the list view
+
+admin.site.register(SellerProfile, CartItemAdmin)
+
 # admin.site.register(CustomUser)

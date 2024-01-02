@@ -9,6 +9,7 @@ from .serializers import (
     SellerVerificationSerializer,
     ResetPasswordSerializer, ResetPasswordConfirmSerializer
     )
+from django.template.loader import render_to_string
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
@@ -168,14 +169,19 @@ class PasswordResetRequestView(APIView):
                 uid = urlsafe_base64_encode(force_bytes(user.pk))
                 token = token_generator.make_token(user)
 
-                reset_url = reverse('password_reset_confirm', kwargs={'uidb64': uid, 'token': token})
+                reset_url = reverse('password/reset/confirm', kwargs={'uidb64': uid, 'token': token})
                 reset_link = request.build_absolute_uri(reset_url)
+
+                # Rendering the HTML email template for password reset
+                html_content = render_to_string('Accounts/password_reset.html', {'reset_url': reset_url})
 
                 send_mail(
                     'Password Reset Request',
-                    f'Click the link to reset your password: {reset_link}',
+                    '',
+                    # f'Click the link to reset your password: {reset_link}',
                     f'{settings.DEFAULT_FROM_EMAIL}',
                     [email],
+                    html_message=html_content,
                     fail_silently=False,
                 )
 
@@ -328,18 +334,28 @@ class SellerProfileCreateView(generics.CreateAPIView):
 
         # Send email with seller profile data to the company
         email_subject = 'New Seller Profile Submission'
-        email_body = f"A new seller profile has been submitted by {user.email}.\n\nSeller Profile Data:\n{seller_profile_instance}\n\n{formatted_data}\n\nPlease review and verify the seller."
+        email_body = render_to_string('Accounts/seller_profile_submission_email.html', {
+            'user_email': user.email,
+            'seller_profile_instance': seller_profile_instance,
+            'formatted_data': formatted_data
+        })
+        # email_body = f"A new seller profile has been submitted by {user.email}.\n\nSeller Profile Data:\n{seller_profile_instance}\n\n{formatted_data}\n\nPlease review and verify the seller."
         sender_email = user.email  # Use the user's email
         receiver_email = settings.DEFAULT_FROM_EMAIL
         
+        # send email to the user
         email_subject2 = 'Seller Profile Recieved'
-        email_body2 = f"Hello {user.first_name} {user.last_name},\nYour seller profile has been received and it's being reviewed by the team.\nThis review process could last for 3 to 5 working days, Pls exercise patience.\nKeep an eye on your inbox, you will recieve an email once we verify you.\n And if your profile didn't pass the checks, you would also get an email indicating the reason."
+        email_body2 = render_to_string('Accounts/seller_profile_received_email.html', {
+            'first_name': user.first_name,
+            'last_name': user.last_name
+        })
+        # email_body2 = f"Hello {user.first_name} {user.last_name},\nYour seller profile has been received and it's being reviewed by the team.\nThis review process could last for 3 to 5 working days, Pls exercise patience.\nKeep an eye on your inbox, you will recieve an email once we verify you.\n And if your profile didn't pass the checks, you would also get an email indicating the reason."
         sender_email2 = settings.DEFAULT_FROM_EMAIL  # Use the user's email
         receiver_email2 = user.email
 
         try:
-            send_mail(email_subject, email_body, sender_email, [receiver_email], fail_silently=False)
-            send_mail(email_subject2, email_body2, sender_email2, [receiver_email2], fail_silently=False)
+            send_mail(email_subject, email_body, sender_email, [receiver_email], html_message=email_body, fail_silently=False)
+            send_mail(email_subject2, email_body2, sender_email2, [receiver_email2], html_message=email_body2, fail_silently=False)
             message = 'Seller profile created successfully'
             response_data = {
                 "message": message,
@@ -376,14 +392,17 @@ class SellerVerificationView(generics.UpdateAPIView):
 
         # Notify the seller via email or other means
         email_subject = 'Seller Profile Verified'
-        email_body = f"Your seller profile with ID: {seller_profile.id} has been verified."
+        email_body = render_to_string('Accounts/seller_profile_verified_email.html', {
+            'seller_profile_id': seller_profile.id
+        })
+        # email_body = f"Your seller profile with ID: {seller_profile.id} has been verified."
         receiver_email = seller_profile.user.email  # Use the user's email
 
         try:
-            send_mail(email_subject, email_body, settings.DEFAULT_FROM_EMAIL, [receiver_email], fail_silently=False)
+            send_mail(email_subject, email_body, settings.DEFAULT_FROM_EMAIL, [receiver_email], html_message=email_body, fail_silently=False)
         except Exception as e:
             # Handle email sending error (optional)
-            pass
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response({'message': 'Seller profile verified successfully'}, status=status.HTTP_200_OK)
     
