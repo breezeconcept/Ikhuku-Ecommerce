@@ -279,7 +279,7 @@ class PaystackWebhookView(APIView):
                     pdf_buffer = generate_pdf_receipt(order)
 
                     # Save the generated receipt to the 'receipt' field
-                    order.receipt.save(f"receipt_order_{order.id}.txt", pdf_buffer, save=True)
+                    order.receipt.save(f"receipt_order_{order.id}.pdf", pdf_buffer, save=True)
 
                     # Sending email to buyer
                     buyer_email = order.user.email
