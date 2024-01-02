@@ -256,7 +256,7 @@ class PaystackWebhookView(APIView):
             reference = event_data.get('reference')  # Retrieve the 'reference' field from 'data'
 
             print(f"Received reference in webhook payload: {reference}")  # Print the reference value
-            status = payload.get('status')
+            status_value = payload.get('status')
 
             # user = self.request.user
             
@@ -268,7 +268,7 @@ class PaystackWebhookView(APIView):
                 raise Http404('Order not found')
 
             if order:
-                if status == 'success':
+                if status_value == 'success':
                     order.status = 'completed'
                     order.is_completed = True
                     order.completed_at = timezone.now()
@@ -310,7 +310,24 @@ class PaystackWebhookView(APIView):
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-
+# Received reference in webhook payload: 
+# {
+#     'event': 'charge.success', 
+#     'data': {
+#         'id': 3427269065, 
+#         'domain': 'test', 
+#         'status': 'success', 
+#         'reference': 'tx5v4h3ek7', 
+#         'amount': 500000, 
+#         'message': None, 
+#         'gateway_response': 'Successful', 
+#         'paid_at': '2024-01-02T11:31:41.000Z', 
+#         'created_at': '2024-01-02T11:31:11.000Z', 
+#         'channel': 'card', 
+#         'currency': 'NGN', 
+#         'ip_address': '102.89.47.11', 'metadata': '', 'fees_breakdown': None, 'log': None, 'fees': 17500, 'fees_split': None, 'authorization': {'authorization_code': 'AUTH_88icmxi321', 'bin': '408408', 'last4': '4081', 'exp_month': '12', 'exp_year': '2030', 'channel': 'card', 'card_type': 'visa ', 'bank': 'TEST BANK', 'country_code': 'NG', 'brand': 'visa', 'reusable': True, 'signature': 'SIG_TM1zGkrjh9uBMdqWeqAM', 'account_name': None}, 'customer': {'id': 153882116, 'first_name': None, 'last_name': None, 'email': 'codegranites@gmail.com', 'customer_code': 'CUS_itc2p4a5lupad2g', 'phone': None, 'metadata': None, 'risk_action': 'default', 'international_format_phone': None}, 'plan': {}, 'subaccount': {}, 'split': {}, 'order_id': None, 'paidAt': '2024-01-02T11:31:41.000Z', 'requested_amount': 500000, 'pos_transaction_data': None, 'source': {'type': 'api', 'source': 'merchant_api', 'entry_point': 'transaction_initialize', 'identifier': None}
+#     }
+# }
 
 def generate_pdf_receipt(order):
     # Create a BytesIO buffer to write the PDF content
