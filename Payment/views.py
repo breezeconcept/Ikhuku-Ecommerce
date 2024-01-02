@@ -252,9 +252,14 @@ class PaystackWebhookView(APIView):
         try:
             payload = request.data
             reference = payload.get('reference')
+            print(f"Received reference in webhook payload: {reference}")  # Print the reference value
             status = payload.get('status')
 
+            # user = self.request.user
+            
+
             try:
+                # order = Order.objects.filter(user=user, is_completed=False, status='pending').first()
                 order = Order.objects.get(paystack_reference=reference)
             except Order.DoesNotExist:
                 raise Http404('Order not found')
