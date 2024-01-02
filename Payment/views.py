@@ -251,7 +251,10 @@ class PaystackWebhookView(APIView):
     def post(self, request):
         try:
             payload = request.data
-            reference = payload.get('reference')
+            print(f"Received reference in webhook payload: {payload}")
+            event_data = payload.get('data', {})  # Access the 'data' key in the payload
+            reference = event_data.get('reference')  # Retrieve the 'reference' field from 'data'
+
             print(f"Received reference in webhook payload: {reference}")  # Print the reference value
             status = payload.get('status')
 
@@ -270,29 +273,29 @@ class PaystackWebhookView(APIView):
                     order.is_completed = True
                     order.completed_at = timezone.now()
 
-                    # Logic to generate the receipt document
-                    # receipt_content = f"Receipt for Order #{order.id}\nTotal Amount: {order.total_amount}"  # Replace with your receipt content generation logic
-                    pdf_buffer = generate_pdf_receipt(order)
+                    # # Logic to generate the receipt document
+                    # # receipt_content = f"Receipt for Order #{order.id}\nTotal Amount: {order.total_amount}"  # Replace with your receipt content generation logic
+                    # pdf_buffer = generate_pdf_receipt(order)
 
-                    # Save the generated receipt to the 'receipt' field
-                    order.receipt.save(f"receipt_order_{order.id}.txt", pdf_buffer, save=True)
+                    # # Save the generated receipt to the 'receipt' field
+                    # order.receipt.save(f"receipt_order_{order.id}.txt", pdf_buffer, save=True)
 
-                    # Sending email to buyer
-                    buyer_email = order.user.email
-                    subject_buyer = 'Order Receipt'
-                    message_buyer = 'Thank you for your order! Please find your receipt attached.'
-                    send_mail(subject_buyer, message_buyer, settings.EMAIL_HOST_USER, [buyer_email], fail_silently=False, attachment=[order.receipt.path])
+                    # # Sending email to buyer
+                    # buyer_email = order.user.email
+                    # subject_buyer = 'Order Receipt'
+                    # message_buyer = 'Thank you for your order! Please find your receipt attached.'
+                    # send_mail(subject_buyer, message_buyer, settings.EMAIL_HOST_USER, [buyer_email], fail_silently=False, attachment=[order.receipt.path])
 
-                    # Sending email to sellers (Replace this logic with actual identification of sellers)
-                    # For example, if each product has a seller field, you could do something like this:
-                    # Get all products in the order and notify their sellers
-                    products = order.products.all()
-                    sellers_emails = list(products.values_list('seller__user__email', flat=True).distinct())
+                    # # Sending email to sellers (Replace this logic with actual identification of sellers)
+                    # # For example, if each product has a seller field, you could do something like this:
+                    # # Get all products in the order and notify their sellers
+                    # products = order.products.all()
+                    # sellers_emails = list(products.values_list('seller__user__email', flat=True).distinct())
 
-                    if sellers_emails:
-                        subject_seller = 'New Order Notification'
-                        message_seller = f'Your product has been ordered. Order ID: {order.id}'
-                        send_mail(subject_seller, message_seller, settings.EMAIL_HOST_USER, sellers_emails, fail_silently=False)
+                    # if sellers_emails:
+                    #     subject_seller = 'New Order Notification'
+                    #     message_seller = f'Your product has been ordered. Order ID: {order.id}'
+                    #     send_mail(subject_seller, message_seller, settings.EMAIL_HOST_USER, sellers_emails, fail_silently=False)
 
                     order.save()
 
