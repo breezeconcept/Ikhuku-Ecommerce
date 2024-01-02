@@ -420,3 +420,10 @@ PASSWORD_RESET_TIMEOUT_DAYS = 1 #(Password reset links expire after 1 day)
 # Prevent content type sniffing
 # SECURE_CONTENT_TYPE_NOSNIFF = True
 # Configure other security-related settings as required
+
+
+
+
+
+PAYSTACK_SECRET_KEY = os.environ.get('PAYSTACK_SECRET_KEY')
+PAYSTACK_PUBLIC_KEY = os.environ.get('PAYSTACK_PUBLIC_KEY')

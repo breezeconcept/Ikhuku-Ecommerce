@@ -24,6 +24,7 @@ python-dotenv
 pytz
 PyYAML
 requests
+reportlab
 s3transfer
 six
 sqlparse
