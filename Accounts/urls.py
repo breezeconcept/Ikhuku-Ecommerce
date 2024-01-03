@@ -39,7 +39,7 @@ urlpatterns = [
     # path('logout/', UserLogoutView.as_view(), name='user-logout'),
 
     path('password/reset/', PasswordResetRequestView.as_view(), name='password_reset'),
-    path('password/reset/confirm/<str:uidb64>/<str:token>/', PasswordResetConfirmView.as_view(), name='password/reset/confirm'),
+    path('password/reset/confirm/<str:uidb64>/<str:token>/', PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('password/change/', ChangePasswordView.as_view(), name='change-password'),
 
     path('create-seller-profile/', SellerProfileCreateView.as_view(), name='create-seller-profile'),
