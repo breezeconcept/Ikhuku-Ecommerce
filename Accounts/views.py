@@ -170,7 +170,8 @@ class PasswordResetRequestView(APIView):
                 token = token_generator.make_token(user)
 
                 reset_url = reverse('password/reset/confirm', kwargs={'uidb64': uid, 'token': token})
-                reset_link = request.build_absolute_uri(reset_url)
+                # reset_link = request.build_absolute_uri(reset_url)
+                reset_link = f"{settings.BASE_URL}{reset_url}"
 
                 # Rendering the HTML email template for password reset
                 html_content = render_to_string('Accounts/password_reset.html', {'reset_link': reset_link})
