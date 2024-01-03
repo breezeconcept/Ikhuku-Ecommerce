@@ -173,7 +173,7 @@ class PasswordResetRequestView(APIView):
                 reset_link = request.build_absolute_uri(reset_url)
 
                 # Rendering the HTML email template for password reset
-                html_content = render_to_string('Accounts/password_reset.html', {'reset_url': reset_url})
+                html_content = render_to_string('Accounts/password_reset.html', {'reset_link': reset_link})
 
                 send_mail(
                     'Password Reset Request',
