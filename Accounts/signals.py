@@ -34,8 +34,10 @@ from .models import CustomUser
 @receiver(post_save, sender=CustomUser)
 def send_verification_email(sender, instance, created, **kwargs):
     if created:  # Only send email on user creation
-        verification_link = reverse('account_verify', kwargs={'id': str(instance.id)})
-        verification_url = settings.BASE_URL + verification_link  # Replace BASE_URL with your URL
+        # verification_link = reverse('account_verify', kwargs={'id': str(instance.id)})
+        # verification_url = settings.BASE_URL + verification_link  # Replace BASE_URL with your URL
+        id = str(instance.id)
+        verification_url = f'https://ikhuku.com/account/verify/{id}'
 
         # Rendering the HTML email template
         html_content = render_to_string('Accounts/email_verify.html', {'verification_url': verification_url})

@@ -168,10 +168,14 @@ class PasswordResetRequestView(APIView):
                 token_generator = PasswordResetTokenGenerator()
                 uid = urlsafe_base64_encode(force_bytes(user.pk))
                 token = token_generator.make_token(user)
+                
 
-                reset_url = reverse('password_reset_confirm', kwargs={'uidb64': uid, 'token': token})
+                # reset_url = reverse('password_reset_confirm', kwargs={'uidb64': uid, 'token': token})
                 # reset_link = request.build_absolute_uri(reset_url)
-                reset_link = f"{settings.BASE_URL}{reset_url}"
+                # reset_link = f"{settings.BASE_URL}{reset_url}"
+                # reset_link = f'https://ikhuku.com/{reset_url}'
+                reset_link = f'https://ikhuku.com/password/reset/confirm/{uid}/{token}'
+                print(reset_link)
 
                 # Rendering the HTML email template for password reset
                 html_content = render_to_string('Accounts/password_reset.html', {'reset_link': reset_link})
