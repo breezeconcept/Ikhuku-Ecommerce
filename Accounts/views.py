@@ -169,7 +169,7 @@ class PasswordResetRequestView(APIView):
                 uid = urlsafe_base64_encode(force_bytes(user.pk))
                 token = token_generator.make_token(user)
 
-                reset_url = reverse('password/reset/confirm', kwargs={'uidb64': uid, 'token': token})
+                reset_url = reverse('password_reset_confirm', kwargs={'uidb64': uid, 'token': token})
                 # reset_link = request.build_absolute_uri(reset_url)
                 reset_link = f"{settings.BASE_URL}{reset_url}"
 
