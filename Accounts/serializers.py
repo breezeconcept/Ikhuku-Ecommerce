@@ -48,7 +48,7 @@ class UpdateUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ['email', 'first_name', 'last_name', 'phone_number', 'address', 'is_merchant', 'is_verified']
+        fields = ['email', 'first_name', 'last_name', 'phone_number', 'address', 'is_merchant', 'is_verified', 'is_admin', 'is_staff']
 
 
 
