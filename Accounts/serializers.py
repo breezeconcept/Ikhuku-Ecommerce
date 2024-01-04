@@ -45,6 +45,8 @@ class UpdateUserSerializer(serializers.ModelSerializer):
     address = serializers.CharField(allow_blank=True, required=False)
     is_merchant = serializers.ReadOnlyField()
     is_verified = serializers.ReadOnlyField()
+    is_admin = serializers.ReadOnlyField()
+    is_staff = serializers.ReadOnlyField()
 
     class Meta:
         model = CustomUser
