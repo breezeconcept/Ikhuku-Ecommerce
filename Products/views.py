@@ -1,7 +1,7 @@
 # views.py
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
-from .models import Product, Category
+from .models import Product, Category, SubCategory
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.pagination import PageNumberPagination
 from Accounts.permissions import IsMerchant
@@ -16,6 +16,8 @@ from .serializers import (
     ProductFilter,
 
      CategorySerializer,
+     SubCategorySerializer,
+     SubCategorySerializer2,
      ProductSerializer, 
 
      MerchantProductListSerializer, 
@@ -54,6 +56,11 @@ class ProductFilterView(generics.ListAPIView):
         if category_name:
             # Filter products by category name
             queryset = queryset.filter(category__name__iexact=category_name)
+
+        subcategory_name = self.request.query_params.get('subcategory')
+        if subcategory_name:
+            # Filter products by category name
+            queryset = queryset.filter(subcategory__name__iexact=subcategory_name)
 
         # Filter by unique price upwards
         unique_price_up = self.request.query_params.get('unique_price_up')
@@ -116,6 +123,12 @@ class CategoryListView(generics.ListAPIView):
     permission_classes = [AllowAny]
 
 
+class SubCategoryListView(generics.ListAPIView):
+    queryset = SubCategory.objects.all()
+    serializer_class = SubCategorySerializer
+    permission_classes = [AllowAny]
+
+
 
 ######### To get all products in a single category (it's also paginated)
 ###########  This endpoint can be accessed by anybody
@@ -128,7 +141,8 @@ class ProductByCategoryView(generics.ListAPIView):
 
     def get_queryset(self):
         category_id = self.kwargs['category_id']
-        return Product.objects.filter(category_id=category_id)
+        subcategory_id = self.kwargs['subcategory_id']
+        return Product.objects.filter(category_id=category_id, subcategory_id=subcategory_id)
     
 
 class ProductBySearchView(generics.ListAPIView):
@@ -160,12 +174,25 @@ class CategoryCreateView(generics.CreateAPIView):
     permission_classes = [IsAdminUser]
 
 
+class SubCategoryCreateView(generics.CreateAPIView):
+    queryset = SubCategory.objects.all()
+    serializer_class = SubCategorySerializer2
+    permission_classes = [IsAdminUser]
+
+
 #########   To update category
 ###########  This endpoint can only be accessed by admin
 
 class CategoryUpdateView(generics.UpdateAPIView):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    permission_classes = [IsAdminUser]
+    lookup_field = 'id'  # Use 'id' or any other field to identify the category
+
+
+class SubCategoryUpdateView(generics.UpdateAPIView):
+    queryset = SubCategory.objects.all()
+    serializer_class = SubCategorySerializer
     permission_classes = [IsAdminUser]
     lookup_field = 'id'  # Use 'id' or any other field to identify the category
 
@@ -180,7 +207,11 @@ class CategoryDeleteView(generics.DestroyAPIView):
     lookup_field = 'id'  # Use 'id' or any other field to identify the category
 
 
-
+class SubCategoryDeleteView(generics.DestroyAPIView):
+    queryset = SubCategory.objects.all()
+    serializer_class = SubCategorySerializer
+    permission_classes = [IsAdminUser]
+    lookup_field = 'id' 
 
 
 

@@ -28,7 +28,7 @@ from rest_framework_simplejwt.views import (
 
 urlpatterns = [
     path('register/', CreateUserView.as_view(), name='user-create'),
-    path('account/verify/<uuid:id>/', EmailVerificationView.as_view(), name='account_verify'),
+    path('confirm-email/<uuid:id>/', EmailVerificationView.as_view(), name='account_verify'),
     path('update-account/', UpdateUserView.as_view(), name='user-detail'),
 
     path('login/', UserLoginView.as_view(), name='user-login'),

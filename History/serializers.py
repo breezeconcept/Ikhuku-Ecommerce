@@ -13,10 +13,10 @@ from Payment.models import Order
 from Products.serializers import ProductSerializer
 
 class OrderHistorySerializer(serializers.ModelSerializer):
-    products = ProductSerializer(many=True)  # Serialize associated products
+    products = ProductSerializer(many=True, read_only=True)  # Serialize associated products
     class Meta:
         model = Order
-        fields = ['id', 'status', 'total_amount', 'products']
+        fields = ['id', 'status', 'total_amount', 'products', 'completed_at']
 
 
 class DetailedOrderHistorySerializer(serializers.ModelSerializer):

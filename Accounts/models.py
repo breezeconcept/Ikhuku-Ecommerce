@@ -81,10 +81,48 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 
 class SellerProfile(models.Model):
+    STATUS_CHOICES = [
+        ('sole proprietorship', 'Sole Proprietorship'),
+        ('limited liability company', 'Limited Liability Company'),
+        ('corporation', 'Corporation'),
+        ('partnership', 'Partnership'),
+        ('professional corporation', 'Professional Corporation'),
+        ('cooperative', 'Cooperative'),
+    ]
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
     company_name = models.CharField(max_length=100)
-    profile_picture = models.ImageField(upload_to='profile_pictures/', blank=True, null=True)
+    business_reg_no = models.CharField(max_length=100, blank=True, null=True)
+    business_cert = models.FileField(upload_to='business_cert/', blank=True, null=True)
+    business_address = models.CharField(max_length=100, blank=True, null=True)
+    business_address_proof = models.FileField(upload_to='business_address_proof/', blank=True, null=True)
+    business_type = models.CharField(max_length=100, choices=STATUS_CHOICES, default="sole proprietorship")
+
+    is_seller_accept_terms = models.BooleanField(default=False)
+
+    nin_number = models.CharField(max_length=100, null=True)
+    nin_card = models.FileField(upload_to='nin_card/', null=True)
+    nin_selfie = models.FileField(upload_to='nin_selfie/', null=True)
+
+    account_name = models.CharField(max_length=100, null=True)
+    bank_name = models.CharField(max_length=100, null=True)
+    account_number = models.IntegerField(null=True)
+
+    is_return_refund_accept = models.BooleanField(default=False)
+    is_warranty = models.BooleanField(default=False, blank=True, null=True)
+    warranty_duration = models.IntegerField(blank=True, null=True)
+
+    business_logo = models.ImageField(upload_to='business_logo/', blank=True, null=True)
+    profile_picture = models.ImageField(upload_to='profile_pictures/', null=True)
+    personal_address = models.CharField(max_length=100, null=True)
+    personal_address_proof = models.FileField(upload_to='personal_address_proof/', null=True)
+    business_bio = models.TextField(max_length=255, null=True)
+
+    is_platform_policy_accept = models.BooleanField(default=False)
+    is_use_verify_info = models.BooleanField(default=False)
+
     business_license = models.FileField(upload_to='business_licenses/', blank=True, null=True)
     is_verified = models.BooleanField(default=False)
     # Add other fields related to the seller profile

@@ -34,7 +34,8 @@ from rest_framework.permissions import IsAuthenticated
 from Payment.models import Order
 from .serializers import OrderHistorySerializer
 from .serializers import DetailedOrderHistorySerializer
-
+from django.db.models import Prefetch
+from Products.models import Product
 
 
 
@@ -44,7 +45,11 @@ class OrderHistoryView(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        return Order.objects.filter(user=user)
+
+        # Prefetch related products to avoid N+1 query problem
+        return Order.objects.filter(user=user).prefetch_related(
+            Prefetch('products', queryset=Product.objects.all())
+        )
 
 
 

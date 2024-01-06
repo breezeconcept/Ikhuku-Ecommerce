@@ -18,6 +18,22 @@ class Category(models.Model):
     
 
 
+class SubCategory(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name = models.CharField(max_length=100)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    # Other fields...
+
+
+    def __str__(self):
+        return self.name
+    
+
+
+
+# def get_default_subcategory():
+#     return SubCategory.objects.get_or_create(name='Unknown')[0]
+
 
 class Product(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -27,6 +43,8 @@ class Product(models.Model):
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    # subcategory = models.ForeignKey(SubCategory, on_delete=models.CASCADE, related_name='products', null=True, default=get_default_subcategory)
+    subcategory = models.ForeignKey(SubCategory, on_delete=models.CASCADE, related_name='products', null=True)
     image = models.ImageField(upload_to='product_images/', blank=True, null=True)
     # Other fields...
 
