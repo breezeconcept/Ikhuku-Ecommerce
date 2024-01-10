@@ -32,7 +32,7 @@ class SubCategorySerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'category']
 
 class SubCategorySerializer2(serializers.ModelSerializer):
-    # category = serializers.PrimaryKeyRelatedField(read_only=True)
+    category = serializers.PrimaryKeyRelatedField(read_only=True)
     class Meta:
         model = SubCategory
         fields = ['id', 'name', 'category']
