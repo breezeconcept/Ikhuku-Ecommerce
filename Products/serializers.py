@@ -26,13 +26,13 @@ class CategorySerializer(serializers.ModelSerializer):
 
 
 class SubCategorySerializer(serializers.ModelSerializer):
-    category = serializers.PrimaryKeyRelatedField(read_only=True)
+    # category = serializers.PrimaryKeyRelatedField(read_only=True)
     class Meta:
         model = SubCategory
         fields = ['id', 'name', 'category']
 
 class SubCategorySerializer2(serializers.ModelSerializer):
-    category = serializers.PrimaryKeyRelatedField(read_only=True)
+    # category = serializers.PrimaryKeyRelatedField(read_only=True)
     class Meta:
         model = SubCategory
         fields = ['id', 'name', 'category']
@@ -65,7 +65,8 @@ class MerchantProductCreateSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(read_only=True, default=serializers.CurrentUserDefault())
     seller = serializers.PrimaryKeyRelatedField(read_only=True)
     category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())
-    subcategory = serializers.PrimaryKeyRelatedField(queryset=SubCategory.objects.all())
+    subcategory = serializers.PrimaryKeyRelatedField(read_only=True)
+    # subcategory = serializers.PrimaryKeyRelatedField(queryset=SubCategory.objects.all())
     image = serializers.ImageField()
 
     class Meta:
@@ -76,7 +77,8 @@ class MerchantProductUpdateDestroySerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(read_only=True)
     seller = serializers.PrimaryKeyRelatedField(read_only=True)
     category = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all())
-    subcategory = serializers.PrimaryKeyRelatedField(queryset=SubCategory.objects.all())
+    subcategory = serializers.PrimaryKeyRelatedField(read_only=True)
+    # subcategory = serializers.PrimaryKeyRelatedField(queryset=SubCategory.objects.all())
     image = serializers.ImageField()
 
     class Meta:
