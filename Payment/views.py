@@ -19,6 +19,8 @@ from django.http import HttpResponse
 from io import BytesIO
 from django.http import Http404
 
+from Carts.models import CartItem  # Assuming you have a CartItem model
+
 
 class OrderListView(generics.ListCreateAPIView):
     queryset = Order.objects.all()
@@ -38,7 +40,7 @@ class OrderDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 
-# Inside your CheckoutInitiationView
+
 class CheckoutInitiationView(APIView):
     def post(self, request):
         try:
@@ -46,27 +48,25 @@ class CheckoutInitiationView(APIView):
                 user=request.user, is_completed=False, status='pending'
             ).first()
 
+            cart_items = CartItem.objects.filter(user=request.user)
+
+            total_amount = calculate_total_amount(cart_items)
+
             if existing_order:
                 # Update the existing order with current cart items
-                cart_items = CartItem.objects.filter(user=request.user)
-
-                # Calculate total amount based on updated cart items
-                total_amount = calculate_total_amount(cart_items)
-
-                # Update existing order details
                 existing_order.total_amount = total_amount
                 existing_order.save()
+                existing_order.products.set([item.product for item in cart_items])
 
                 # Serialize existing order details
                 serializer = OrderSerializer(existing_order)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             else:
                 # Create a new order
-                cart_items = CartItem.objects.filter(user=request.user)
-                total_amount = calculate_total_amount(cart_items)
                 new_order = Order.objects.create(
                     user=request.user, total_amount=total_amount
                 )
+                new_order.products.set([item.product for item in cart_items])
 
                 # Serialize new order details
                 serializer = OrderSerializer(new_order)
@@ -75,7 +75,6 @@ class CheckoutInitiationView(APIView):
             # Handle exceptions during order creation/update
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
 def calculate_total_amount(cart_items):
     # Calculate the total amount based on cart items
     total_amount = sum(item.product.price * item.quantity for item in cart_items)
@@ -83,9 +82,53 @@ def calculate_total_amount(cart_items):
 
 
 
+# # Inside your CheckoutInitiationView
+# class CheckoutInitiationView(APIView):
+#     def post(self, request):
+#         try:
+#             existing_order = Order.objects.filter(
+#                 user=request.user, is_completed=False, status='pending'
+#             ).first()
+
+#             if existing_order:
+#                 # Update the existing order with current cart items
+#                 cart_items = CartItem.objects.filter(user=request.user)
+
+#                 # Calculate total amount based on updated cart items
+#                 total_amount = calculate_total_amount(cart_items)
+
+#                 # Update existing order details
+#                 existing_order.total_amount = total_amount
+#                 existing_order.save()
+
+#                 # Serialize existing order details
+#                 serializer = OrderSerializer(existing_order)
+#                 return Response(serializer.data, status=status.HTTP_200_OK)
+#             else:
+#                 # Create a new order
+#                 cart_items = CartItem.objects.filter(user=request.user)
+#                 total_amount = calculate_total_amount(cart_items)
+#                 new_order = Order.objects.create(
+#                     user=request.user, total_amount=total_amount
+#                 )
+
+#                 # Serialize new order details
+#                 serializer = OrderSerializer(new_order)
+#                 return Response(serializer.data, status=status.HTTP_200_OK)
+#         except Exception as e:
+#             # Handle exceptions during order creation/update
+#             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-# View to update the latest pending order with user details (address information)
+# def calculate_total_amount(cart_items):
+#     # Calculate the total amount based on cart items
+#     total_amount = sum(item.product.price * item.quantity for item in cart_items)
+#     return total_amount
+
+
+
+
+
 class OrderUpdateView(APIView):
     def post(self, request):
         try:
@@ -106,6 +149,11 @@ class OrderUpdateView(APIView):
                 order.city = city
                 order.state = state
                 order.postal_code = postal_code
+
+                # You might need to adjust the products based on your new logic
+                # For example:
+                # products = ... # Your logic to update products in the order
+
                 order.save()
 
                 # Serialize updated order details
@@ -116,6 +164,39 @@ class OrderUpdateView(APIView):
         except Exception as e:
             # Handle exceptions during order update
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# # View to update the latest pending order with user details (address information)
+# class OrderUpdateView(APIView):
+#     def post(self, request):
+#         try:
+#             # Fetch the latest pending order for the authenticated user
+#             order = Order.objects.filter(
+#                 user=request.user, is_completed=False, status='pending'
+#             ).order_by('-created_at').first()
+
+#             if order:
+#                 # Extract address details from request data
+#                 street_address = request.data.get('street_address')
+#                 city = request.data.get('city')
+#                 state = request.data.get('state')
+#                 postal_code = request.data.get('postal_code')
+
+#                 # Update order with user details
+#                 order.street_address = street_address
+#                 order.city = city
+#                 order.state = state
+#                 order.postal_code = postal_code
+#                 order.save()
+
+#                 # Serialize updated order details
+#                 serializer = OrderSerializer(order)
+#                 return Response(serializer.data, status=status.HTTP_200_OK)
+#             else:
+#                 return Response({'error': 'No pending order found'}, status=status.HTTP_404_NOT_FOUND)
+#         except Exception as e:
+#             # Handle exceptions during order update
+#             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 
