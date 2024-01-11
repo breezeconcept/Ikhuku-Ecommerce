@@ -332,11 +332,11 @@ class PaystackWebhookView(APIView):
     def post(self, request):
         try:
             payload = request.data
-            print(f"Received reference in webhook payload: {payload}")
+            # print(f"Received reference in webhook payload: {payload}")
             event_data = payload.get('data', {})  # Access the 'data' key in the payload
             reference = event_data.get('reference')  # Retrieve the 'reference' field from 'data'
 
-            print(f"Received reference in webhook payload: {reference}")  # Print the reference value
+            # print(f"Received reference in webhook payload: {reference}")  # Print the reference value
             # status_value = payload.get('status')
             status_value = event_data.get('status')
 
@@ -362,22 +362,25 @@ class PaystackWebhookView(APIView):
                     # Save the generated receipt to the 'receipt' field
                     order.receipt.save(f"receipt_order_{order.id}.pdf", pdf_buffer, save=True)
 
-                    # Sending email to buyer
-                    buyer_email = order.user.email
-                    subject_buyer = 'Order Receipt'
-                    message_buyer = 'Thank you for your order! Please find your receipt attached.'
-                    send_mail(subject_buyer, message_buyer, settings.EMAIL_HOST_USER, [buyer_email], fail_silently=False, attachment=[order.receipt.path])
+                    # # Clear the user's cart after a successful order
+                    # CartItem.objects.filter(user=request.user).delete()
 
-                    # Sending email to sellers (Replace this logic with actual identification of sellers)
-                    # For example, if each product has a seller field, you could do something like this:
-                    # Get all products in the order and notify their sellers
-                    products = order.products.all()
-                    sellers_emails = list(products.values_list('seller__user__email', flat=True).distinct())
+                    # # Sending email to buyer
+                    # buyer_email = order.user.email
+                    # subject_buyer = 'Order Receipt'
+                    # message_buyer = 'Thank you for your order! Please find your receipt attached.'
+                    # send_mail(subject_buyer, message_buyer, settings.EMAIL_HOST_USER, [buyer_email], fail_silently=False, attachment=[order.receipt.path])
 
-                    if sellers_emails:
-                        subject_seller = 'New Order Notification'
-                        message_seller = f'Your product has been ordered. Order ID: {order.id}'
-                        send_mail(subject_seller, message_seller, settings.EMAIL_HOST_USER, sellers_emails, fail_silently=False)
+                    # # Sending email to sellers (Replace this logic with actual identification of sellers)
+                    # # For example, if each product has a seller field, you could do something like this:
+                    # # Get all products in the order and notify their sellers
+                    # products = order.products.all()
+                    # sellers_emails = list(products.values_list('seller__user__email', flat=True).distinct())
+
+                    # if sellers_emails:
+                    #     subject_seller = 'New Order Notification'
+                    #     message_seller = f'Your product has been ordered. Order ID: {order.id}'
+                    #     send_mail(subject_seller, message_seller, settings.EMAIL_HOST_USER, sellers_emails, fail_silently=False)
 
                     order.save()
 
@@ -420,6 +423,8 @@ def generate_pdf_receipt(order):
 
 
 
+
+
 class PaystackPaymentCallbackView(APIView):
     def post(self, request):
         try:
@@ -430,15 +435,90 @@ class PaystackPaymentCallbackView(APIView):
                 'Authorization': f'Bearer {settings.PAYSTACK_SECRET_KEY}',
             }
             response = requests.get(verify_url, headers=headers)
+
             if response.status_code == 200:
                 # Process Paystack verify API response
-                # Update order status based on payment success/failure
-                # Return success or failure response
-                return Response({'message': 'Payment verified'}, status=status.HTTP_200_OK)
+                paystack_data = response.json()
+                
+                # Extract order_id from the paystack data
+                order_id = paystack_data.get('data', {}).get('order_id')
+                
+                if order_id:
+                    # Get the order based on the order_id
+                    order = Order.objects.filter(id=order_id).first()
+                    
+                    if order:
+                        # Clear the user's cart after a successful order
+                        CartItem.objects.filter(user=request.user).delete()
+
+                        # Sending email to the buyer
+                        # Sending email to the buyer
+                        buyer_email = order.user.email
+                        subject_buyer = 'Order Receipt'
+                        message_buyer = 'Thank you for your order! Please find your receipt attached.'
+                        send_mail(subject_buyer, message_buyer, settings.EMAIL_HOST_USER, [buyer_email], fail_silently=False, attachment=[order.receipt.path])
+
+                        # Sending email to sellers (Replace this logic with actual identification of sellers)
+                        # For example, if each product has a seller field, you could do something like this:
+                        # Get all products in the order and notify their sellers
+                        products = order.products.all()
+                        sellers_emails = list(products.values_list('seller__user__email', flat=True).distinct())
+
+                        if sellers_emails:
+                            subject_seller = 'New Order Notification'
+                            message_seller = f'Your product has been ordered. Order ID: {order.id}'
+                            send_mail(subject_seller, message_seller, settings.EMAIL_HOST_USER, sellers_emails, fail_silently=False)
+                        return Response({'message': 'Payment verified'}, status=status.HTTP_200_OK)
+                    else:
+                        return Response({'error': 'Order not found'}, status=status.HTTP_404_NOT_FOUND)
+                else:
+                    return Response({'error': 'Invalid Paystack response. Missing order_id'}, status=status.HTTP_400_BAD_REQUEST)
             else:
                 return Response({'error': 'Failed to verify payment'}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+# class PaystackPaymentCallbackView(APIView):
+#     def post(self, request):
+#         try:
+#             reference = request.data.get('reference')  # Get reference from frontend
+#             # Call Paystack verify API
+#             verify_url = f'https://api.paystack.co/transaction/verify/{reference}'
+#             headers = {
+#                 'Authorization': f'Bearer {settings.PAYSTACK_SECRET_KEY}',
+#             }
+#             response = requests.get(verify_url, headers=headers)
+#             if response.status_code == 200:
+#                 # Process Paystack verify API response
+#                 # Update order status based on payment success/failure
+#                 # Return success or failure response
+#                 if order:
+#                     # Clear the user's cart after a successful order
+#                     CartItem.objects.filter(user=request.user).delete()
+
+#                     # Sending email to buyer
+#                     buyer_email = order.user.email
+#                     subject_buyer = 'Order Receipt'
+#                     message_buyer = 'Thank you for your order! Please find your receipt attached.'
+#                     send_mail(subject_buyer, message_buyer, settings.EMAIL_HOST_USER, [buyer_email], fail_silently=False, attachment=[order.receipt.path])
+
+#                     # Sending email to sellers (Replace this logic with actual identification of sellers)
+#                     # For example, if each product has a seller field, you could do something like this:
+#                     # Get all products in the order and notify their sellers
+#                     products = order.products.all()
+#                     sellers_emails = list(products.values_list('seller__user__email', flat=True).distinct())
+
+#                     if sellers_emails:
+#                         subject_seller = 'New Order Notification'
+#                         message_seller = f'Your product has been ordered. Order ID: {order.id}'
+#                         send_mail(subject_seller, message_seller, settings.EMAIL_HOST_USER, sellers_emails, fail_silently=False)
+
+#                 return Response({'message': 'Payment verified'}, status=status.HTTP_200_OK)
+#             else:
+#                 return Response({'error': 'Failed to verify payment'}, status=status.HTTP_400_BAD_REQUEST)
+#         except Exception as e:
+#             return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 
