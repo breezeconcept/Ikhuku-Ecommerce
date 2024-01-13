@@ -98,26 +98,26 @@ class SellerProfile(models.Model):
     business_cert = models.FileField(upload_to='business_cert/', blank=True, null=True)
     business_address = models.CharField(max_length=100, blank=True, null=True)
     business_address_proof = models.FileField(upload_to='business_address_proof/', blank=True, null=True)
-    business_type = models.CharField(max_length=100, choices=STATUS_CHOICES, default="sole proprietorship")
+    business_type = models.CharField(max_length=100, choices=STATUS_CHOICES, default="sole proprietorship", blank=True, null=True)
 
     is_seller_accept_terms = models.BooleanField(default=False)
 
     nin_number = models.CharField(max_length=100, null=True)
-    nin_card = models.FileField(upload_to='nin_card/', null=True)
-    nin_selfie = models.FileField(upload_to='nin_selfie/', null=True)
+    nin_card = models.FileField(upload_to='nin_card/', blank=True, null=True)
+    nin_selfie = models.FileField(upload_to='nin_selfie/', blank=True, null=True)
 
     account_name = models.CharField(max_length=100, null=True)
     bank_name = models.CharField(max_length=100, null=True)
     account_number = models.IntegerField(null=True)
 
-    is_return_refund_accept = models.BooleanField(default=False)
+    is_return_refund_accept = models.BooleanField(default=False, blank=True, null=True)
     is_warranty = models.BooleanField(default=False, blank=True, null=True)
     warranty_duration = models.IntegerField(blank=True, null=True)
 
     business_logo = models.ImageField(upload_to='business_logo/', blank=True, null=True)
     profile_picture = models.ImageField(upload_to='profile_pictures/', null=True)
-    personal_address = models.CharField(max_length=100, null=True)
-    personal_address_proof = models.FileField(upload_to='personal_address_proof/', null=True)
+    personal_address = models.CharField(max_length=100, blank=True, null=True)
+    personal_address_proof = models.FileField(upload_to='personal_address_proof/', blank=True, null=True)
     business_bio = models.TextField(max_length=255, null=True)
 
     is_platform_policy_accept = models.BooleanField(default=False)
