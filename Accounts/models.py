@@ -108,7 +108,7 @@ class SellerProfile(models.Model):
 
     account_name = models.CharField(max_length=100, null=True)
     bank_name = models.CharField(max_length=100, null=True)
-    account_number = models.IntegerField(null=True)
+    account_number = models.PositiveBigIntegerField(null=True)
 
     is_return_refund_accept = models.BooleanField(default=False, blank=True, null=True)
     is_warranty = models.BooleanField(default=False, blank=True, null=True)
